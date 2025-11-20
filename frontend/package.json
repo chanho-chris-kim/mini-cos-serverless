@@ -1,0 +1,37 @@
+{
+  "name": "mini-cos-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "tailwind:init": "tailwindcss init -p"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.9.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
+    "@types/react": "^18.3.27",
+    "@types/react-dom": "^18.3.7",
+    "@types/react-router-dom": "^5.3.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.0.4",
+    "vite": "^5.4.21",
+    "vitest": "^0.32.0"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/chanho-chris-kim/MINI-COS/LICENSE"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "mini-cos",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/chanho-chris-kim/MINI-COS/LICENSE"
+    }
+  ]
+}

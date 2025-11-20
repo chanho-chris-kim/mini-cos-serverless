@@ -1,0 +1,15 @@
+service: mini-cos
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+
+functions:
+  createOrder:
+    handler: backend/dist/handlers/orders.handler.createOrder
+    events:
+      - http:
+          path: orders
+          method: post
+  processTasks:
+    handler: backend/dist/handlers/tasks.handler.processTasks
