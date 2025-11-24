@@ -1,6 +1,5 @@
 import type { Task } from "../../types";
-import * as TasksAPI from "../../api/tasks";
-import { useState } from "react";
+import * as TasksAPI from "../../api/tasks"; 
 
 interface Props {
   tasks: Task[];
@@ -8,8 +7,6 @@ interface Props {
 }
 
 export default function TasksTable({ tasks, onTasksUpdated }: Props) {
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-
   const handleStatusChange = async (taskId: string, status: Task["status"]) => {
     await TasksAPI.updateTaskStatus(taskId, status);
     onTasksUpdated();
@@ -56,12 +53,14 @@ export default function TasksTable({ tasks, onTasksUpdated }: Props) {
         </thead>
         <tbody>
           {tasks.map((t) => {
-            const firstItem = t.order?.items?.[0];
+            const index = parseInt(t.id.split("-t-")[1]);
+            const item = t.order?.items?.[index];
+
             return (
               <tr
                 key={t.id}
                 className="hover:bg-secondary-hover transition-colors duration-150 align-middle"
-              > 
+              >
                 <td className="py-2 px-4 border-b truncate max-w-[9rem] relative">
                   <span
                     className="cursor-pointer"
@@ -78,7 +77,7 @@ export default function TasksTable({ tasks, onTasksUpdated }: Props) {
                   {t.order?.customer?.name || "-"}
                 </td>
                 <td className="py-2 px-4 border-b align-middle">
-                  {firstItem ? `${firstItem.sku} (${firstItem.qty})` : "-"}
+                  {item ? `${item.sku} (${item.qty})` : "-"}
                 </td>
                 <td className="py-2 px-4 border-b align-middle">
                   {t.worker || "-"}

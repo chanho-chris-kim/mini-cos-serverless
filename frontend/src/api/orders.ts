@@ -1,7 +1,5 @@
-import axios from "axios";
-import type { Order, Item, Task } from "../types";
-
-const BASE_URL = "http://localhost:3000/orders";
+import type { Order, Item } from "../types";
+import { API } from "./apiClient";
 
 // Capitalize first letters for customer names
 const toCapitalCase = (str: string) =>
@@ -13,21 +11,33 @@ const toCapitalCase = (str: string) =>
     .join(" ");
 
 export async function fetchOrders(): Promise<Order[]> {
-  const res = await axios.get(BASE_URL);
+  const res = await API.get("/orders");
   return res.data;
 }
 
 export async function createOrder(
   customerName: string,
   items: Item[]
-): Promise<{ order: Order; tasks: Task[] }> {
-  const res = await axios.post(BASE_URL, {
-    customer: { name: toCapitalCase(customerName || "Anonymous") },
-    items,
-  });
+): Promise<Order> {
+  const payload = {
+    customer: {
+      name: toCapitalCase(customerName || "Anonymous"),
+      email: "",
+      homeAddress: {
+        line1: "",
+        city: "",
+        postal: "",
+        lat: 0,
+        lng: 0,
+      }
+    },
+    items
+  };
+
+  const res = await API.post("/orders", payload);
   return res.data;
 }
 
 export async function deleteOrder(orderId: string): Promise<void> {
-  await axios.delete(`${BASE_URL}/${orderId}`);
+  await API.delete(`/orders/${orderId}`);
 }

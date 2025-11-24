@@ -17,15 +17,21 @@ export interface Order {
   status: OrderStatus;
 }
 
-export type OrderStatus = "NEW" | "PROCESSING" | "COMPLETED" | "CANCELED" | "DELETED";
+export type OrderStatus =
+  | "NEW"
+  | "PROCESSING"
+  | "COMPLETED"
+  | "CANCELED"
+  | "DELETED";
 
 // --- Tasks ---
 export interface Task {
   id: string;
   order: Order;
   status: TaskStatus;
-  worker?: string;      // assigned worker
-  assignedTo?: string;  // optional internal assignment
+  itemIndex: number;
+  worker?: string; // assigned worker
+  assignedTo?: string; // optional internal assignment
 }
 
 export type TaskStatus =
