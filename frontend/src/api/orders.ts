@@ -1,43 +1,25 @@
-import type { Order, Item } from "../types";
-import { API } from "./apiClient";
-
-// Capitalize first letters for customer names
-const toCapitalCase = (str: string) =>
-  str
-    .trim()
-    .toLowerCase()
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+import { api } from "./apiClient";
+import type { Order } from "../lib/types";
 
 export async function fetchOrders(): Promise<Order[]> {
-  const res = await API.get("/orders");
+  const res = await api.get("/orders");
   return res.data;
 }
 
-export async function createOrder(
-  customerName: string,
-  items: Item[]
-): Promise<Order> {
-  const payload = {
-    customer: {
-      name: toCapitalCase(customerName || "Anonymous"),
-      email: "",
-      homeAddress: {
-        line1: "",
-        city: "",
-        postal: "",
-        lat: 0,
-        lng: 0,
-      }
-    },
-    items
-  };
-
-  const res = await API.post("/orders", payload);
+export async function fetchOrder(id: string): Promise<Order> {
+  const res = await api.get(`/orders/${id}`);
   return res.data;
 }
 
-export async function deleteOrder(orderId: string): Promise<void> {
-  await API.delete(`/orders/${orderId}`);
+export async function createOrder(data: Partial<Order>): Promise<Order> {
+  const res = await api.post("/orders", data);
+  return res.data;
+}
+
+export async function updateOrderStatus(id: string, status: string): Promise<void> {
+  await api.patch(`/orders/${id}/status`, { status });
+}
+
+export async function deleteOrder(id: string): Promise<void> {
+  await api.delete(`/orders/${id}`);
 }

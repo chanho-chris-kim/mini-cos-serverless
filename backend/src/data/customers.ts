@@ -1,4 +1,4 @@
-import type { Address, Customer } from "../types";
+import type { Customer } from "../types";
 
 export const customers: Customer[] = [
   {

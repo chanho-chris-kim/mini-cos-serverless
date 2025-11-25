@@ -1,14 +1,5 @@
-// ===============================
-// Items
-// ===============================
-export interface Item {
-  sku: string;
-  qty: number;
-}
+import type { BoxState, ReturnCategory } from "../domain/orders/box.model";
 
-// ===============================
-// Address
-// ===============================
 export interface Address {
   line1: string;
   city: string;
@@ -17,90 +8,36 @@ export interface Address {
   lng: number;
 }
 
-// ===============================
-// Customer  
-// ===============================
 export interface Customer {
   id: string;
   name: string;
   email: string;
   homeAddress: Address;
-  deliveryAddress?: Address; // optional
+  deliveryAddress: Address;
 }
 
-// ===============================
-// Orders
-// ===============================
-export type OrderStatus =
-  | "NEW"
-  | "PROCESSING"
-  | "COMPLETED"
-  | "CANCELED"
-  | "DELETED";
-
-export interface Order {
-  id: string;
-  createdAt: string;
-  status: OrderStatus;
-  items: Item[];
-  customer: Customer;
-}
-
-// ===============================
-// Tasks
-// ===============================
-export type TaskType = "PICK" | "PACK" | "SHIP";
-
-export type TaskStatus =
-  | "PENDING"
-  | "ASSIGNED"
-  | "IN_PROGRESS"
-  | "COMPLETED"
-  | "CANCELED"
-  | "DELETED_ORDER";
-
-export interface Task {
-  id: string;
-  type: TaskType;
-
-  // The specific item for this task
-  sku: string;
-  qty: number;
-
-  // Order relationship
-  orderId: string;
-  order?: Order; // optional full order reference
-
-  // Worker assignment
-  status: TaskStatus;
-  worker?: string;
-  assignedTo?: string;
-}
-
-// Optional helper – used in some API responses
-export interface OrdersResponse {
-  order: Order;
-  tasks: Task[];
-}
-
-// ===============================
-// Workers
-// ===============================
 export interface Worker {
   id: string;
   name: string;
-  role: "Warehouse Picker" | "Delivery Specialist";
+
+  role: "PICKER" | "PACKER" | "SHIPPER" | "DRIVER" | "QA";
+
   maxTasks: number;
   currentTasks: number;
-  homeBase: Address; // for distance algorithms later
+
+  warehouseId?: string;
+
+  homeBase: Address;
+
+  activeTaskIds?: string[];
 }
 
-// ===============================
-// Warehouses
-// ===============================
 export interface Warehouse {
   id: string;
   name: string;
   location: Address;
-  inventory: Record<string, number>; // SKU → qty
+  inventory: Record<string, number>;
 }
+
+// Optional shared view types
+export type { BoxState, ReturnCategory };

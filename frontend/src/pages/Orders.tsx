@@ -1,105 +1,38 @@
-import { useEffect, useState, useCallback } from "react";
-import type { Order, Task } from "../types";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import * as OrdersAPI from "../api/orders";
-import * as TasksAPI from "../api/tasks";
-import CreateOrderForm from "../components/orders/CreateOrderForm";
-import OrdersTable from "../components/orders/OrdersTable";
-import TasksTable from "../components/orders/TasksTable";
+import { Table } from "../components/Table";
+import Badge from "../components/Badge";
 
 export default function Orders() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loadingTasks, setLoadingTasks] = useState(false);
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ["orders"],
+    queryFn: OrdersAPI.fetchOrders,
+  });
 
-  const loadOrders = useCallback(async () => {
-    try {
-      const data = await OrdersAPI.fetchOrders();
-      setOrders(data);
-    } catch (err) {
-      console.error("Failed to load orders:", err);
-    }
-  }, []);
-
-  const loadTasks = useCallback(async () => {
-    try {
-      const data = await TasksAPI.fetchTasks();
-      setTasks(data);
-    } catch (err) {
-      console.error("Failed to load tasks:", err);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadOrders();
-    loadTasks();
-  }, [loadOrders, loadTasks]);
-
-  const handleAssignTasks = async () => {
-    setLoadingTasks(true);
-    try {
-      await TasksAPI.assignTasks();
-      await loadTasks();
-    } catch (err) {
-      console.error("Failed to assign tasks:", err);
-      alert("Failed to assign tasks");
-    } finally {
-      setLoadingTasks(false);
-    }
-  };
-
-  const handleDeleteOrder = async (orderId: string) => {
-    try {
-      await OrdersAPI.deleteOrder(orderId);
-      await loadOrders();
-      await loadTasks();  
-    } catch (err) {
-      console.error("Failed to delete order:", err);
-      alert("Failed to delete order");
-    }
-  };
+  if (isLoading) return <div>Loading orders...</div>;
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-secondary text-textPrimary">
-      <h1 className="text-3xl font-bold mb-6 text-center text-primary">
-        Mini-COS Dashboard
-      </h1>
+    <div className="space-y-3">
+      <h2 className="text-lg font-semibold">Orders</h2>
 
-      <section aria-labelledby="orders-heading" className="mb-12">
-        <CreateOrderForm
-          onOrderCreated={async () => {
-            await loadOrders();
-            await loadTasks();
-          }}
-        />
-        <h2
-          id="orders-heading"
-          className="text-2xl font-semibold mb-4 text-primary"
-        >
-          Orders
-        </h2>
-        <OrdersTable orders={orders} onDeleteOrder={handleDeleteOrder} />
-      </section>
-
-      <section aria-labelledby="tasks-heading">
-        <h2
-          id="tasks-heading"
-          className="text-2xl font-semibold mb-4 text-primary"
-        >
-          Warehouse Tasks
-        </h2>
-        <button
-          onClick={handleAssignTasks}
-          disabled={loadingTasks}
-          className={`px-4 py-2 rounded text-secondary mb-4 ${
-            loadingTasks
-              ? "bg-primary-hover cursor-not-allowed"
-              : "bg-primary hover:bg-primary-hover"
-          }`}
-        >
-          {loadingTasks ? "Assigning..." : "Assign Tasks"}
-        </button>
-        <TasksTable tasks={tasks} onTasksUpdated={loadTasks} />
-      </section>
+      <Table headers={["Order", "Customer", "Status", "Boxes", "Created"]}>
+        {orders.map((o) => (
+          <tr key={o.id} className="border-t border-slate-100">
+            <td className="px-4 py-3">
+              <Link to={`/orders/${o.id}`} className="text-slate-900 font-medium hover:underline">
+                {o.id}
+              </Link>
+            </td>
+            <td className="px-4 py-3">{o.customerName}</td>
+            <td className="px-4 py-3"><Badge>{o.status}</Badge></td>
+            <td className="px-4 py-3">{o.boxes?.length ?? 0}</td>
+            <td className="px-4 py-3 text-slate-500 text-xs">
+              {new Date(o.createdAt).toLocaleString()}
+            </td>
+          </tr>
+        ))}
+      </Table>
     </div>
   );
 }
