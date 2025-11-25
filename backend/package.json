@@ -27,10 +27,5 @@
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.4"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/chanho-chris-kim/mini-cos-serverless/blob/main/LICENSE"
-    }
-  ]
+  "license": "CC-BY-NC-ND-4.0"
 }
