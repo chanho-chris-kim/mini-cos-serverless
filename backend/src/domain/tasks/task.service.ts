@@ -1,37 +1,23 @@
-import type { TaskStatus } from "../../types";
-import type { TaskEntity } from "./task.model";
+// backend/src/domain/tasks/task.service.ts
 import { TaskRepository } from "./task.repository";
+import type { TaskStatus } from "./task.model";
+
+const repo = new TaskRepository();
 
 export class TaskService {
-  private repo = new TaskRepository();
-
-  getAll(): TaskEntity[] {
-    return this.repo.getAll();
+  async listTasks() {
+    return repo.listTasks();
   }
 
-  getPending(): TaskEntity[] {
-    return this.repo.getPending();
+  async getTasksForWorker(workerId: string) {
+    return repo.listTasksForWorker(workerId);
   }
 
-  updateStatus(id: string, status: TaskStatus): TaskEntity | undefined {
-    const existing = this.repo.getById(id);
-    if (!existing) return undefined;
-    const updated: TaskEntity = { ...existing, status };
-    return this.repo.save(updated);
+  async updateStatus(taskId: string, status: TaskStatus) {
+    return repo.updateStatus(taskId, status);
   }
 
-  assignWorker(id: string, workerName: string): TaskEntity | undefined {
-    const existing = this.repo.getById(id);
-    if (!existing) return undefined;
-    const updated: TaskEntity = {
-      ...existing,
-      worker: workerName,
-      status: "ASSIGNED",
-    };
-    return this.repo.save(updated);
-  }
-
-  delete(id: string): boolean {
-    return this.repo.delete(id);
+  async assignWorker(taskId: string, workerId: string) {
+    return repo.assignWorker(taskId, workerId);
   }
 }

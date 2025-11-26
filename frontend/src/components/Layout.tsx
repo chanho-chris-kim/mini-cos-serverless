@@ -1,20 +1,21 @@
-import { Outlet } from "react-router-dom";
+// Layout.tsx
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
-import type { User } from "../lib/types";
+import { Outlet } from "react-router-dom";
+import { useUserStore } from "../lib/store";
 
-export default function Layout({
-  user,
-  onLogout,
-}: { user: User | null; onLogout: () => void }) {
-  if (!user) return <Outlet />;
+export default function Layout() {
+  const user = useUserStore((s) => s.user);
+  const clearUser = useUserStore((s) => s.clearUser);
+
+  if (!user) return null;
 
   return (
-    <div className="h-full flex bg-slate-50 text-slate-900">
+    <div className="flex h-screen">
       <Sidebar user={user} />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Topbar user={user} onLogout={onLogout} />
-        <main className="flex-1 p-5 overflow-auto">
+      <div className="flex-1 flex flex-col">
+        <Topbar user={user} onLogout={clearUser} />
+        <main className="p-4 overflow-auto">
           <Outlet />
         </main>
       </div>

@@ -1,8 +1,10 @@
+// backend/src/domain/orders/order.model.ts
 import type { BoxEntity } from "./box.model";
 
 export interface OrderEntity {
   id: string;
   customerId: string;
+  customerName: string;
   createdAt: string;
 
   status: "PENDING" | "PARTIAL" | "FULFILLED" | "DELIVERED" | "RETURNED";

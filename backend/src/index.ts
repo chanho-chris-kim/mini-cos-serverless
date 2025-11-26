@@ -1,13 +1,13 @@
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
 import apiRouter from "./api";
 
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
+// Keep your current prefix (frontend expects /api/*)
 app.use("/api", apiRouter);
 
 app.get("/health", (_req, res) => {
@@ -16,6 +16,7 @@ app.get("/health", (_req, res) => {
 
 const PORT = process.env.PORT || 4000;
 
+// Only listen locally. Lambda won't hit this block.
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Mini-COS backend listening on port ${PORT}`);

@@ -1,4 +1,4 @@
-import { api } from "./apiClient";
+import api from "./apiClient";
 import type { Task, TaskStatus } from "../lib/types";
 
 export async function fetchTasks(): Promise<Task[]> {
@@ -6,7 +6,10 @@ export async function fetchTasks(): Promise<Task[]> {
   return res.data;
 }
 
-export async function updateTaskStatus(id: string, status: TaskStatus): Promise<void> {
+export async function updateTaskStatus(
+  id: string,
+  status: TaskStatus
+): Promise<void> {
   await api.patch(`/tasks/${id}/status`, { status });
 }
 

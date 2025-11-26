@@ -1,3 +1,4 @@
+// backend/src/domain/orders/box.model.ts
 export type BoxState =
   | "PENDING"
   | "PICK_ASSIGNED"

@@ -1,12 +1,13 @@
+// backend/src/domain/tasks/task.model.ts
 export type TaskType = "PICK" | "PACK" | "SHIP" | "QA" | "REFURBISH";
-export type TaskStatus = "PENDING" | "IN_PROGRESS" | "DONE" | "FAILED";
+export type TaskStatus = "PENDING_PICK" | "IN_PROGRESS" | "DONE" | "FAILED";
 
 export interface TaskEntity {
   id: string;
+  orderId: string;
+  boxId: string;
   warehouseId: string;
-  type: TaskType;
-  boxId: string;         // tie tasks to physical boxes
-  assignedTo?: string;   // workerId
+  workerId: string | null;
   status: TaskStatus;
-  dueAt: string;
+  createdAt: string;
 }

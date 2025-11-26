@@ -1,4 +1,4 @@
-import { api } from "./apiClient";
+import api from "./apiClient";
 import type { Order } from "../lib/types";
 
 export async function fetchOrders(): Promise<Order[]> {
@@ -16,7 +16,10 @@ export async function createOrder(data: Partial<Order>): Promise<Order> {
   return res.data;
 }
 
-export async function updateOrderStatus(id: string, status: string): Promise<void> {
+export async function updateOrderStatus(
+  id: string,
+  status: string
+): Promise<void> {
   await api.patch(`/orders/${id}/status`, { status });
 }
 

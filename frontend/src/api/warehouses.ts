@@ -1,4 +1,4 @@
-import { api } from "./apiClient";
+import api from "./apiClient";
 import type { Warehouse } from "../lib/types";
 
 export async function fetchWarehouses(): Promise<Warehouse[]> {

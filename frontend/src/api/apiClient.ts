@@ -1,8 +1,18 @@
+// frontend/src/api/apiClient.ts
 import axios from "axios";
+import { useUserStore } from "../lib/store";
 
-// Shared axios instance pointed at the backend API
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
-
-export const api = axios.create({
-  baseURL: API_BASE_URL,
+const api = axios.create({
+  baseURL: "http://localhost:3000/api",
 });
+
+// Attach Authorization header automatically
+api.interceptors.request.use((config) => {
+  const token = useUserStore.getState().token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default api;

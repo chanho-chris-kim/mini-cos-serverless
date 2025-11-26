@@ -1,41 +1,48 @@
+// backend/src/domain/tasks/task.repository.ts
 import { tasks } from "../../data/tasks";
-import type { TaskEntity } from "./task.model";
+import type { TaskEntity, TaskStatus } from "./task.model";
 
 export class TaskRepository {
-  getAll(): TaskEntity[] {
+  async listTasks(): Promise<TaskEntity[]> {
     return tasks;
   }
 
-  getById(id: string): TaskEntity | undefined {
-    return tasks.find((t) => t.id === id);
+  async listTasksForWorker(workerId: string): Promise<TaskEntity[]> {
+    return tasks.filter((t) => t.workerId === workerId);
   }
 
-  save(task: TaskEntity): TaskEntity {
-    const index = tasks.findIndex((t) => t.id === task.id);
-    if (index === -1) {
+  async getTask(taskId: string): Promise<TaskEntity | null> {
+    return tasks.find((t) => t.id === taskId) || null;
+  }
+
+  async saveTask(task: TaskEntity): Promise<void> {
+    const idx = tasks.findIndex((t) => t.id === task.id);
+    if (idx === -1) {
       tasks.push(task);
     } else {
-      tasks[index] = task;
+      tasks[idx] = task;
     }
+  }
+
+  async updateStatus(taskId: string, newStatus: TaskStatus): Promise<TaskEntity> {
+    const task = await this.getTask(taskId);
+    if (!task) throw new Error("Task not found");
+    task.status = newStatus;
+    await this.saveTask(task);
     return task;
   }
 
-  getPending(): TaskEntity[] {
-    return tasks.filter((t) => t.status === "PENDING");
+  async assignWorker(taskId: string, workerId: string): Promise<TaskEntity> {
+    const task = await this.getTask(taskId);
+    if (!task) throw new Error("Task not found");
+    task.workerId = workerId;
+    task.status = "IN_PROGRESS";
+    await this.saveTask(task);
+    return task;
   }
 
-  removeByOrderId(orderId: string): void {
-    tasks.forEach((t, idx) => {
-      if (t.orderId === orderId) {
-        tasks[idx] = { ...t, status: "DELETED_ORDER" };
-      }
-    });
-  }
-
-  delete(id: string): boolean {
-    const index = tasks.findIndex((t) => t.id === id);
-    if (index === -1) return false;
-    tasks.splice(index, 1);
-    return true;
+  seedIfEmpty() {
+    if (tasks.length > 0) return;
+    // You could push default tasks here if needed.
   }
 }

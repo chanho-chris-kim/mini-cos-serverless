@@ -1,44 +1,47 @@
-import { Request, Response } from "express";
+// backend/src/api/controllers/orders.controller.ts
+import type { Request, Response } from "express";
 import { OrderService } from "../../domain/orders/order.service";
 
 const service = new OrderService();
 
-export const getOrders = (_req: Request, res: Response) => {
-  const all = service.getAll();
-  res.json(all);
-};
-
-export const getOrderById = (req: Request, res: Response) => {
-  const order = service.getById(req.params.id);
-  if (!order) return res.status(404).json({ message: "Order not found" });
-  res.json(order);
-};
-
-export const createOrder = (req: Request, res: Response) => {
+/** GET /orders */
+export const getOrders = async (_req: Request, res: Response) => {
   try {
-    const { customer, items } = req.body;
-    const created = service.create({ customer, items });
-    res.status(201).json(created);
-  } catch (err) {
-    console.error(err);
-    res.status(400).json({ message: "Failed to create order" });
+    const orders = await service.listOrders();
+    res.json(orders);
+  } catch (err: any) {
+    console.error("getOrders failed:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
-export const updateOrderStatus = (req: Request, res: Response) => {
-  const { status } = req.body;
-  const updated = service.updateStatus(req.params.id, status);
-  if (!updated) return res.status(404).json({ message: "Order not found" });
-  res.json(updated);
+/** GET /orders/:id */
+export const getOrderById = async (req: Request, res: Response) => {
+  try {
+    const order = await service.getOrder(req.params.id);
+    res.json(order);
+  } catch (err: any) {
+    res.status(404).json({ error: err.message });
+  }
 };
 
-export const deleteOrder = (req: Request, res: Response) => {
+/** PATCH /orders/:id/status — recompute from boxes */
+export const updateOrderStatus = async (req: Request, res: Response) => {
   try {
-    service.delete(req.params.id);
-    // Idempotent delete: always return 204 even if order already removed
-    res.status(204).send();
-  } catch (err) {
-    console.error("Failed to delete order", err);
-    res.status(500).json({ message: "Failed to delete order" });
+    const status = await service.updateStatusDerived(req.params.id);
+    res.json({ id: req.params.id, status });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
   }
+};
+
+/** POST /orders — simple demo create (not wired to frontend yet) */
+export const createOrder = async (req: Request, res: Response) => {
+  // Optional: implement later; keeping stubbed for now.
+  res.status(501).json({ error: "Order creation not implemented in demo" });
+};
+
+/** DELETE /orders/:id — not recommended in real WMS */
+export const deleteOrder = async (_req: Request, res: Response) => {
+  res.json({ message: "Order deletion not implemented" });
 };

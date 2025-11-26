@@ -1,9 +1,24 @@
-import { Request, Response } from "express";
-import { AssignmentService } from "../../domain/ai/assignment.service";
+// backend/src/api/controllers/assignment.controller.ts
 
-const service = new AssignmentService();
+import type { Request, Response } from "express";
+import { TaskService } from "../../domain/tasks/task.service";
 
-export const assignTasks = (_req: Request, res: Response) => {
-  const updated = service.assignPendingTasks();
-  res.json(updated);
+const service = new TaskService();
+
+/** --------------------------------
+ * POST /assign
+ * Runs auto-assignment engine
+ * -------------------------------- */
+export const assignTasks = async (_req: Request, res: Response) => {
+  try {
+    const result = await service.autoAssign();
+
+    res.json({
+      message: `Assigned ${result.assigned} tasks`,
+      details: result.details,
+    });
+  } catch (err: any) {
+    console.error("Auto-assign failed:", err);
+    res.status(500).json({ error: err.message });
+  }
 };
