@@ -29299,26 +29299,20 @@ var analytics_route_default = router9;
 
 // src/api/routes/auth.route.ts
 var import_express10 = __toESM(require_express3(), 1);
-
-// src/api/controllers/auth.controller.ts
-var authService2 = new AuthService();
-var login = async (req, res) => {
-  try {
-    const { email, password } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ error: "email and password are required" });
-    }
-    const result = await authService2.login(email, password);
-    return res.json(result);
-  } catch (err) {
-    console.error("Login failed:", err);
-    return res.status(401).json({ error: "Invalid email or password" });
-  }
-};
-
-// src/api/routes/auth.route.ts
 var router10 = (0, import_express10.Router)();
-router10.post("/login", login);
+var auth = new AuthService();
+router10.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const result = await auth.login(email, password);
+    return res.json(result);
+  } catch {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+});
+router10.get("/me", requireAuth, (req, res) => {
+  return res.json({ user: req.user });
+});
 var auth_route_default = router10;
 
 // src/api/index.ts
