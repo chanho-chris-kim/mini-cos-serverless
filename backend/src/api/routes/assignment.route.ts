@@ -1,8 +1,21 @@
 import { Router } from "express";
-import { assignTasks } from "../controllers/assignment.controller";
+import { requireAuth, requireRole } from "../../middleware/auth.middleware";
+import { autoAssignAll, processIncomingOrder } from "../controllers/assignment.controller";
 
 const router = Router();
 
-router.post("/", assignTasks);
+// Real users with OPS or ADMIN permission
+router.post(
+  "/auto",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"),
+  autoAssignAll
+);
+
+// Simulator route
+router.post(
+  "/incoming",
+  processIncomingOrder // intentionally NOT protected
+);
 
 export default router;

@@ -1,10 +1,8 @@
 import type { Worker } from "../../types";
-import { WorkerRepository } from "./worker.repository";
+import { workerRepo } from "../sharedRepos";
 
 export class WorkerService {
-  private repo = new WorkerRepository();
-
   getAll(): Worker[] {
-    return this.repo.getAll();
+    return workerRepo.listWorkers();
   }
 }

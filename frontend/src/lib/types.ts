@@ -29,8 +29,8 @@ export type ReturnCategory =
   | "SALVAGE"
   | "TRASH";
 
-export type TaskType = "PICK" | "PACK" | "SHIP" | "QA" | "REFURBISH";
-export type TaskStatus = "PENDING" | "IN_PROGRESS" | "DONE" | "FAILED";
+export type TaskType = "PICK" | "PACK" | "SHIP";
+export type TaskStatus = "PENDING" | "PENDING_PICK" | "IN_PROGRESS" | "DONE" | "FAILED";
 
 export interface User {
   id: string;
@@ -51,10 +51,13 @@ export interface Worker {
   warehouseId: string;
   zone?: "PICKING" | "PACKING" | "SHIPPING" | "RETURNS" | "QA";
   activeTaskIds?: string[];
+  capacity?: number;
+  activeTasks?: number;
 }
 
 export interface Box {
   id: string;
+  orderId: string;
   sku: string;
   state: BoxState;
   warehouseId?: string;
@@ -64,10 +67,22 @@ export interface Box {
 
 export interface Order {
   id: string;
+  customerFirstName?: string;
+  customerLastName?: string;
   customerName: string;
+  email?: string;
+  warehouseId?: string;
+  destination: {
+    address: string;
+    city: string;
+    postal: string;
+    lat: number;
+    lng: number;
+  };
   createdAt: string;
   status: "PENDING" | "PARTIAL" | "FULFILLED" | "DELIVERED" | "RETURNED";
   boxes: Box[];
+  tasks?: Task[];
   routes?: Record<string, string[]>;
 }
 
@@ -77,13 +92,62 @@ export interface Task {
   type: TaskType;
   status: TaskStatus;
   boxId: string;
-  assignedTo?: string;
-  dueAt: string;
+  workerId?: string | null;
+  createdAt?: string;
 }
 export interface Warehouse {
   id: string;
   name: string;
   region?: string;
-  zones?: string[];
-  stock?: Record<string, number>;
+  location?: {
+    street?: string;
+    city?: string;
+    province?: string;
+    postal?: string;
+    lat?: number;
+    lng?: number;
+  };
+  address?: string;
+  coords?: { lat: number; lng: number };
+  capacity?: number;
+  activeWorkerCount?: number;
+  inventory?: Record<string, number>;
+}
+
+export interface WarehouseEvent {
+  id: string;
+  warehouseId: string;
+  type: string;
+  message: string;
+  timestamp: string;
+  meta?: Record<string, any>;
+}
+
+export interface ReturnItem {
+  boxId: string;
+  orderId: string;
+  sku: string;
+  warehouseId?: string;
+  state: string;
+  category?: string;
+  customerName?: string;
+  destinationAddress?: string;
+  createdAt?: string;
+  qaStartedAt?: string;
+  classifiedAt?: string;
+  notes?: string;
+}
+
+export interface ReturnDetail extends ReturnItem {
+  events?: Array<{
+    eventType: string;
+    message: string;
+    timestamp: string;
+  }>;
+  timeline?: {
+    receivedAt?: string;
+    qaStartedAt?: string;
+    classifiedAt?: string;
+    restockedAt?: string;
+  };
 }

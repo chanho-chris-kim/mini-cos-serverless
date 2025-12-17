@@ -1,0 +1,42 @@
+[
+  {
+    "street": "200 Boulevard René-Lévesque Ouest",
+    "city": "Montreal",
+    "province": "QC",
+    "postal": "H2Z 1X4",
+    "lat": 45.503,
+    "lng": -73.572
+  },
+  {
+    "street": "1 Front St E",
+    "city": "Toronto",
+    "province": "ON",
+    "postal": "M5E 1B2",
+    "lat": 43.6475,
+    "lng": -79.3763
+  },
+  {
+    "street": "999 Canada Pl",
+    "city": "Vancouver",
+    "province": "BC",
+    "postal": "V6C 3E1",
+    "lat": 49.2885,
+    "lng": -123.1128
+  },
+  {
+    "street": "1231 8 St SW",
+    "city": "Calgary",
+    "province": "AB",
+    "postal": "T2R 1B1",
+    "lat": 51.0425,
+    "lng": -114.0861
+  },
+  {
+    "street": "1650 Bedford Hwy",
+    "city": "Halifax",
+    "province": "NS",
+    "postal": "B4A 2X9",
+    "lat": 44.7265,
+    "lng": -63.667
+  }
+]

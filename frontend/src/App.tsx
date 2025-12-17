@@ -12,9 +12,13 @@ import OrderDetail from "./pages/OrderDetail";
 import Tasks from "./pages/Tasks";
 import Scan from "./pages/Scan";
 import ReturnsPage from "./pages/Returns";
+import ReturnsDashboard from "./pages/ReturnsDashboard";
+import ReturnDetail from "./pages/ReturnDetail";
 import Warehouses from "./pages/Warehouses";
 import Workers from "./pages/Workers";
 import Analytics from "./pages/Analytics";
+import WarehouseDetail from "./pages/WarehouseDetail";
+import OpsCenter from "./pages/OpsCenter";
 
 import { getHomeRouteFor } from "./lib/roleHome";
 
@@ -61,10 +65,14 @@ export default function App() {
         <Route path="/tasks" element={<Tasks user={user} />} />
         <Route path="/scan" element={<Scan user={user} />} />
         <Route path="/returns" element={<ReturnsPage />} />
+        <Route path="/returns-dashboard" element={<ReturnsDashboard />} />
+        <Route path="/returns/:boxId" element={<ReturnDetail />} />
 
         <Route path="/warehouses" element={<Warehouses />} />
+        <Route path="/warehouses/:id" element={<WarehouseDetail />} />
         <Route path="/workers" element={<Workers />} />
         <Route path="/analytics" element={<Analytics />} />
+        <Route path="/ops" element={<OpsCenter />} />
       </Route>
 
       {/* Fallback redirect */}

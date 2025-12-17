@@ -1,11 +1,16 @@
 import express from "express";
 import cors from "cors";
 import apiRouter from "./api";
+import { runAllSeeds } from "./seed/seed";
+import { devBypassAuth } from "./middleware/devBypass.middleware";
+console.log("NODE_ENV is:", process.env.NODE_ENV);
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(devBypassAuth);
+runAllSeeds();
 
 // Keep your current prefix (frontend expects /api/*)
 app.use("/api", apiRouter);

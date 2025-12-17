@@ -1,10 +1,8 @@
 // backend/src/api/controllers/scan.controller.ts
 
 import type { Request, Response } from "express";
-import { OrderService } from "../../domain/orders/order.service";
 import { TaskService } from "../../domain/tasks/task.service";
 
-const orderService = new OrderService();
 const taskService = new TaskService();
 
 /**
@@ -13,31 +11,17 @@ const taskService = new TaskService();
  */
 export const scanBox = async (req: Request, res: Response) => {
   try {
-    const { boxId, userId, warehouseId, zone } = req.body;
-
-    if (!boxId || !userId || !warehouseId || !zone) {
-      return res.status(400).json({
-        error: "boxId, userId, warehouseId, and zone are required",
-      });
+    const completed = await taskService.completeNextInProgress();
+    if (!completed) {
+      return res.status(404).json({ error: "No in-progress tasks to scan" });
     }
 
-    // Update box state internally
-    const result = await orderService.scanBox({
-      boxId,
-      userId,
-      warehouseId,
-      zone,
-    });
-
-    // Mark task complete if exists
-    await taskService.completeTaskForBox(boxId, userId);
-
+    // Box and order status updates happen inside TaskRepository.updateStatus
     return res.json({
-      orderId: result.order.id,
-      boxId,
-      previousState: result.previousState,
-      newState: result.newState,
-      message: `${zone} scan: ${result.previousState} → ${result.newState}`,
+      ok: true,
+      taskId: completed.id,
+      boxId: completed.boxId,
+      newStatus: completed.status,
     });
   } catch (err: any) {
     console.error("Scan failed:", err);

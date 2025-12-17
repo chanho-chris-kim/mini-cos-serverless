@@ -2,15 +2,23 @@
 
 import type { Request, Response } from "express";
 import { TaskService } from "../../domain/tasks/task.service";
+import type { RequestWithUser } from "../../middleware/auth.middleware";
 
 const service = new TaskService();
 
 /** --------------------------------
  * GET /tasks
  * -------------------------------- */
-export const getTasks = async (_req: Request, res: Response) => {
+export const getTasks = async (req: Request, res: Response) => {
   try {
+    const user = (req as RequestWithUser).user;
     const tasks = await service.listTasks();
+
+    if (user?.role === "WORKER" && user.warehouseId) {
+      const filtered = tasks.filter((t: any) => t.warehouseId === user.warehouseId);
+      return res.json(filtered);
+    }
+
     res.json(tasks);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

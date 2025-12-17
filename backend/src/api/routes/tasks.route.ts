@@ -19,7 +19,8 @@ router.get(
 router.patch(
   "/:id/status",
   requireAuth,
-  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER")
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"),
+  updateTaskStatus
 );
 router.delete(
   "/:id",

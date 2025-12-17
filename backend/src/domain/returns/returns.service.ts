@@ -1,11 +1,12 @@
 // backend/src/domain/returns/returns.service.ts
 
-import { OrderRepository } from "../orders/order.repository";
+import { orderRepo, warehouseEventsRepo } from "../sharedRepos";
 import { WarehouseService } from "../warehouses/warehouse.service";
 import type { ReturnCategory } from "../orders/box.model";
+import { eventLogger } from "../events/eventLogger.service";
 
 export class ReturnsService {
-  private orderRepo = new OrderRepository();
+  private orderRepo = orderRepo;
   private warehouseService = new WarehouseService();
 
   /** --------------------------------
@@ -21,6 +22,7 @@ export class ReturnsService {
     box.warehouseId = warehouseId;
 
     await this.orderRepo.updateBoxState(boxId, "RETURN_RECEIVED");
+    eventLogger.logReturnReceived(warehouseId, boxId);
 
     return {
       boxId,
@@ -41,6 +43,9 @@ export class ReturnsService {
     if (!box) throw new Error("Box not found");
 
     await this.orderRepo.updateBoxState(boxId, "QA_IN_PROGRESS");
+    if (box.warehouseId) {
+      eventLogger.logReturnQAStart(box.warehouseId, boxId);
+    }
 
     return {
       boxId,
@@ -75,7 +80,16 @@ export class ReturnsService {
         console.warn("Return has no warehouseId to restock");
       } else {
         await this.warehouseService.restock(updated.warehouseId, updated.sku);
+        eventLogger.log(
+          updated.warehouseId,
+          "INVENTORY_INCREASED",
+          `Restocked SKU ${updated.sku} at ${updated.warehouseId}`,
+          { sku: updated.sku }
+        );
       }
+    }
+    if (updated.warehouseId) {
+      eventLogger.logReturnClassified(updated.warehouseId, boxId, category);
     }
 
     return {
@@ -94,7 +108,7 @@ export class ReturnsService {
    * -------------------------------- */
   async listReturns() {
     const boxes = await this.orderRepo.listBoxes();
-    return boxes.filter((b) =>
+    const relevant = boxes.filter((b) =>
       [
         "RETURN_RECEIVED",
         "QA_PENDING",
@@ -103,6 +117,31 @@ export class ReturnsService {
         "RETURN_CLASSIFIED",
       ].includes(b.state)
     );
+
+    const events = warehouseEventsRepo.getEventsForWarehouse("ALL", 1000);
+
+    return relevant.map((b) => {
+      const order = this.orderRepo.findById(b.orderId);
+      const boxEvents = events.filter((e) => e.meta?.boxId === b.id);
+      const intakeAt = boxEvents.find((e) => e.type === "RETURN_RECEIVED")?.timestamp;
+      const qaStartedAt = boxEvents.find((e) => e.type === "RETURN_QA_STARTED")?.timestamp;
+      const classifiedAt = boxEvents.find((e) => e.type === "RETURN_CLASSIFIED")?.timestamp;
+
+      return {
+        boxId: b.id,
+        orderId: b.orderId,
+        sku: b.sku,
+        warehouseId: b.warehouseId,
+        state: b.state,
+        category: b.returnCategory,
+        customerName: order?.customerName,
+        destinationAddress: order?.destination?.address ?? order?.destination?.line1,
+        createdAt: intakeAt ?? order?.createdAt,
+        qaStartedAt,
+        classifiedAt,
+        notes: b.notes,
+      };
+    });
   }
 
   /** --------------------------------

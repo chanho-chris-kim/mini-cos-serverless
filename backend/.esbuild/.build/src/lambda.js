@@ -2522,12 +2522,12 @@ var require_debug = __commonJS({
     exports2.formatters = {};
     var prevTime;
     function selectColor(namespace) {
-      var hash = 0, i;
+      var hash2 = 0, i;
       for (i in namespace) {
-        hash = (hash << 5) - hash + namespace.charCodeAt(i);
-        hash |= 0;
+        hash2 = (hash2 << 5) - hash2 + namespace.charCodeAt(i);
+        hash2 |= 0;
       }
-      return exports2.colors[Math.abs(hash) % exports2.colors.length];
+      return exports2.colors[Math.abs(hash2) % exports2.colors.length];
     }
     function createDebug(namespace) {
       function debug() {
@@ -19340,17 +19340,17 @@ var require_router = __commonJS({
     var toString = Object.prototype.toString;
     var proto = module2.exports = function(options) {
       var opts = options || {};
-      function router12(req, res, next) {
-        router12.handle(req, res, next);
+      function router21(req, res, next) {
+        router21.handle(req, res, next);
       }
-      setPrototypeOf(router12, proto);
-      router12.params = {};
-      router12._params = [];
-      router12.caseSensitive = opts.caseSensitive;
-      router12.mergeParams = opts.mergeParams;
-      router12.strict = opts.strict;
-      router12.stack = [];
-      return router12;
+      setPrototypeOf(router21, proto);
+      router21.params = {};
+      router21._params = [];
+      router21.caseSensitive = opts.caseSensitive;
+      router21.mergeParams = opts.mergeParams;
+      router21.strict = opts.strict;
+      router21.stack = [];
+      return router21;
     };
     proto.param = function param(name, fn) {
       if (typeof name === "function") {
@@ -20073,16 +20073,16 @@ var require_etag = __commonJS({
   "../node_modules/etag/index.js"(exports2, module2) {
     "use strict";
     module2.exports = etag;
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     var Stats = require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash = crypto.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash2 = crypto2.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
-      return '"' + len.toString(16) + "-" + hash + '"';
+      return '"' + len.toString(16) + "-" + hash2 + '"';
     }
     function etag(entity, options) {
       if (entity == null) {
@@ -21956,7 +21956,7 @@ var require_application = __commonJS({
   "../node_modules/express/lib/application.js"(exports2, module2) {
     "use strict";
     var finalhandler = require_finalhandler();
-    var Router12 = require_router();
+    var Router21 = require_router();
     var methods = require_methods();
     var middleware = require_init();
     var query = require_query();
@@ -22021,7 +22021,7 @@ var require_application = __commonJS({
     };
     app2.lazyrouter = function lazyrouter() {
       if (!this._router) {
-        this._router = new Router12({
+        this._router = new Router21({
           caseSensitive: this.enabled("case sensitive routing"),
           strict: this.enabled("strict routing")
         });
@@ -22030,17 +22030,17 @@ var require_application = __commonJS({
       }
     };
     app2.handle = function handle(req, res, callback) {
-      var router12 = this._router;
+      var router21 = this._router;
       var done = callback || finalhandler(req, res, {
         env: this.get("env"),
         onerror: logerror.bind(this)
       });
-      if (!router12) {
+      if (!router21) {
         debug("no routes defined on app");
         done();
         return;
       }
-      router12.handle(req, res, done);
+      router21.handle(req, res, done);
     };
     app2.use = function use(fn) {
       var offset = 0;
@@ -22060,15 +22060,15 @@ var require_application = __commonJS({
         throw new TypeError("app.use() requires a middleware function");
       }
       this.lazyrouter();
-      var router12 = this._router;
+      var router21 = this._router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router12.use(path, fn2);
+          return router21.use(path, fn2);
         }
         debug(".use app under %s", path);
         fn2.mountpath = path;
         fn2.parent = this;
-        router12.use(path, function mounted_app(req, res, next) {
+        router21.use(path, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             setPrototypeOf(req, orig.request);
@@ -22972,11 +22972,11 @@ var require_request2 = __commonJS({
 // ../node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "../node_modules/cookie-signature/index.js"(exports2) {
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     exports2.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if ("string" != typeof secret) throw new TypeError("Secret string must be provided.");
-      return val + "." + crypto.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto2.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports2.unsign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -22985,7 +22985,7 @@ var require_cookie_signature = __commonJS({
       return sha1(mac) == sha1(val) ? str : false;
     };
     function sha1(str) {
-      return crypto.createHash("sha1").update(str).digest("hex");
+      return crypto2.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -23882,7 +23882,7 @@ var require_express2 = __commonJS({
     var mixin = require_merge_descriptors();
     var proto = require_application();
     var Route = require_route();
-    var Router12 = require_router();
+    var Router21 = require_router();
     var req = require_request2();
     var res = require_response2();
     exports2 = module2.exports = createApplication;
@@ -23905,7 +23905,7 @@ var require_express2 = __commonJS({
     exports2.request = req;
     exports2.response = res;
     exports2.Route = Route;
-    exports2.Router = Router12;
+    exports2.Router = Router21;
     exports2.json = bodyParser.json;
     exports2.query = require_query();
     exports2.raw = bodyParser.raw;
@@ -24478,14 +24478,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "../node_modules/jwa/index.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto2.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -24575,17 +24575,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto.createHmac("sha" + bits, secret);
+        var hmac = crypto2.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto ? function timingSafeEqual2(a, b) {
+    var timingSafeEqual = "timingSafeEqual" in crypto2 ? function timingSafeEqual2(a, b) {
       if (a.byteLength !== b.byteLength) {
         return false;
       }
-      return crypto.timingSafeEqual(a, b);
+      return crypto2.timingSafeEqual(a, b);
     } : function timingSafeEqual2(a, b) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -24602,7 +24602,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto.createSign("RSA-SHA" + bits);
+        var signer = crypto2.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -24612,7 +24612,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto.createVerify("RSA-SHA" + bits);
+        var verifier = crypto2.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -24621,11 +24621,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto.createSign("RSA-SHA" + bits);
+        var signer = crypto2.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto2.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto2.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -24635,12 +24635,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto.createVerify("RSA-SHA" + bits);
+        var verifier = crypto2.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto2.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto2.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -25755,8 +25755,8 @@ var require_compare = __commonJS({
   "../node_modules/jsonwebtoken/node_modules/semver/functions/compare.js"(exports2, module2) {
     "use strict";
     var SemVer = require_semver();
-    var compare = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
-    module2.exports = compare;
+    var compare2 = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
+    module2.exports = compare2;
   }
 });
 
@@ -25764,8 +25764,8 @@ var require_compare = __commonJS({
 var require_rcompare = __commonJS({
   "../node_modules/jsonwebtoken/node_modules/semver/functions/rcompare.js"(exports2, module2) {
     "use strict";
-    var compare = require_compare();
-    var rcompare = (a, b, loose) => compare(b, a, loose);
+    var compare2 = require_compare();
+    var rcompare = (a, b, loose) => compare2(b, a, loose);
     module2.exports = rcompare;
   }
 });
@@ -25774,8 +25774,8 @@ var require_rcompare = __commonJS({
 var require_compare_loose = __commonJS({
   "../node_modules/jsonwebtoken/node_modules/semver/functions/compare-loose.js"(exports2, module2) {
     "use strict";
-    var compare = require_compare();
-    var compareLoose = (a, b) => compare(a, b, true);
+    var compare2 = require_compare();
+    var compareLoose = (a, b) => compare2(a, b, true);
     module2.exports = compareLoose;
   }
 });
@@ -25818,8 +25818,8 @@ var require_rsort = __commonJS({
 var require_gt = __commonJS({
   "../node_modules/jsonwebtoken/node_modules/semver/functions/gt.js"(exports2, module2) {
     "use strict";
-    var compare = require_compare();
-    var gt = (a, b, loose) => compare(a, b, loose) > 0;
+    var compare2 = require_compare();
+    var gt = (a, b, loose) => compare2(a, b, loose) > 0;
     module2.exports = gt;
   }
 });
@@ -25828,8 +25828,8 @@ var require_gt = __commonJS({
 var require_lt = __commonJS({
   "../node_modules/jsonwebtoken/node_modules/semver/functions/lt.js"(exports2, module2) {
     "use strict";
-    var compare = require_compare();
-    var lt = (a, b, loose) => compare(a, b, loose) < 0;
+    var compare2 = require_compare();
+    var lt = (a, b, loose) => compare2(a, b, loose) < 0;
     module2.exports = lt;
   }
 });
@@ -25838,8 +25838,8 @@ var require_lt = __commonJS({
 var require_eq = __commonJS({
   "../node_modules/jsonwebtoken/node_modules/semver/functions/eq.js"(exports2, module2) {
     "use strict";
-    var compare = require_compare();
-    var eq = (a, b, loose) => compare(a, b, loose) === 0;
+    var compare2 = require_compare();
+    var eq = (a, b, loose) => compare2(a, b, loose) === 0;
     module2.exports = eq;
   }
 });
@@ -25848,8 +25848,8 @@ var require_eq = __commonJS({
 var require_neq = __commonJS({
   "../node_modules/jsonwebtoken/node_modules/semver/functions/neq.js"(exports2, module2) {
     "use strict";
-    var compare = require_compare();
-    var neq = (a, b, loose) => compare(a, b, loose) !== 0;
+    var compare2 = require_compare();
+    var neq = (a, b, loose) => compare2(a, b, loose) !== 0;
     module2.exports = neq;
   }
 });
@@ -25858,8 +25858,8 @@ var require_neq = __commonJS({
 var require_gte = __commonJS({
   "../node_modules/jsonwebtoken/node_modules/semver/functions/gte.js"(exports2, module2) {
     "use strict";
-    var compare = require_compare();
-    var gte = (a, b, loose) => compare(a, b, loose) >= 0;
+    var compare2 = require_compare();
+    var gte = (a, b, loose) => compare2(a, b, loose) >= 0;
     module2.exports = gte;
   }
 });
@@ -25868,8 +25868,8 @@ var require_gte = __commonJS({
 var require_lte = __commonJS({
   "../node_modules/jsonwebtoken/node_modules/semver/functions/lte.js"(exports2, module2) {
     "use strict";
-    var compare = require_compare();
-    var lte = (a, b, loose) => compare(a, b, loose) <= 0;
+    var compare2 = require_compare();
+    var lte = (a, b, loose) => compare2(a, b, loose) <= 0;
     module2.exports = lte;
   }
 });
@@ -26764,12 +26764,12 @@ var require_simplify = __commonJS({
   "../node_modules/jsonwebtoken/node_modules/semver/ranges/simplify.js"(exports2, module2) {
     "use strict";
     var satisfies = require_satisfies();
-    var compare = require_compare();
+    var compare2 = require_compare();
     module2.exports = (versions, range, options) => {
       const set = [];
       let first = null;
       let prev = null;
-      const v = versions.sort((a, b) => compare(a, b, options));
+      const v = versions.sort((a, b) => compare2(a, b, options));
       for (const version of v) {
         const included = satisfies(version, range, options);
         if (included) {
@@ -26817,7 +26817,7 @@ var require_subset = __commonJS({
     var Comparator = require_comparator();
     var { ANY } = Comparator;
     var satisfies = require_satisfies();
-    var compare = require_compare();
+    var compare2 = require_compare();
     var subset = (sub, dom, options = {}) => {
       if (sub === dom) {
         return true;
@@ -26877,7 +26877,7 @@ var require_subset = __commonJS({
       }
       let gtltComp;
       if (gt && lt) {
-        gtltComp = compare(gt.semver, lt.semver, options);
+        gtltComp = compare2(gt.semver, lt.semver, options);
         if (gtltComp > 0) {
           return null;
         } else if (gtltComp === 0 && (gt.operator !== ">=" || lt.operator !== "<=")) {
@@ -26957,14 +26957,14 @@ var require_subset = __commonJS({
       if (!a) {
         return b;
       }
-      const comp = compare(a.semver, b.semver, options);
+      const comp = compare2(a.semver, b.semver, options);
       return comp > 0 ? a : comp < 0 ? b : b.operator === ">" && a.operator === ">=" ? b : a;
     };
     var lowerLT = (a, b, options) => {
       if (!a) {
         return b;
       }
-      const comp = compare(a.semver, b.semver, options);
+      const comp = compare2(a.semver, b.semver, options);
       return comp < 0 ? a : comp > 0 ? b : b.operator === "<" && a.operator === "<=" ? b : a;
     };
     module2.exports = subset;
@@ -26988,7 +26988,7 @@ var require_semver2 = __commonJS({
     var minor = require_minor();
     var patch = require_patch();
     var prerelease = require_prerelease();
-    var compare = require_compare();
+    var compare2 = require_compare();
     var rcompare = require_rcompare();
     var compareLoose = require_compare_loose();
     var compareBuild = require_compare_build();
@@ -27026,7 +27026,7 @@ var require_semver2 = __commonJS({
       minor,
       patch,
       prerelease,
-      compare,
+      compare: compare2,
       rcompare,
       compareLoose,
       compareBuild,
@@ -28028,221 +28028,1125 @@ module.exports = __toCommonJS(lambda_exports);
 var import_serverless_express = __toESM(require_src2(), 1);
 
 // src/index.ts
-var import_express12 = __toESM(require_express3(), 1);
+var import_express21 = __toESM(require_express3(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 
 // src/api/index.ts
-var import_express11 = __toESM(require_express3(), 1);
+var import_express20 = __toESM(require_express3(), 1);
 
 // src/api/routes/orders.route.ts
 var import_express = __toESM(require_express3(), 1);
 
-// src/data/orders.ts
-var orders = [
-  {
-    id: "O-10021",
-    customerId: "C-1",
-    customerName: "Jane Doe",
-    createdAt: "2025-11-20T14:42:00Z",
-    status: "PARTIAL",
-    routes: {
-      wh1: ["B-1", "B-2"]
-    },
-    boxes: [
-      {
-        id: "B-1",
-        orderId: "O-10021",
-        sku: "COZEY001",
-        state: "PACKED",
-        warehouseId: "wh1"
-      },
-      {
-        id: "B-2",
-        orderId: "O-10021",
-        sku: "COZEY002",
-        state: "OUTBOUND",
-        warehouseId: "wh1",
-        trackingNumber: "1Z999999"
-      }
-    ]
-  },
-  {
-    id: "O-10022",
-    customerId: "C-2",
-    customerName: "Alex Kim",
-    createdAt: "2025-11-21T10:20:00Z",
-    status: "PENDING",
-    routes: {
-      wh1: ["B-3"]
-    },
-    boxes: [
-      {
-        id: "B-3",
-        orderId: "O-10022",
-        sku: "COZEY003",
-        state: "PENDING",
-        warehouseId: "wh1"
-      }
-    ]
-  },
-  {
-    id: "O-10023",
-    customerId: "C-3",
-    customerName: "Return Example",
-    createdAt: "2025-11-22T09:00:00Z",
-    status: "RETURNED",
-    routes: {
-      wh1: ["B-4"]
-    },
-    boxes: [
-      {
-        id: "B-4",
-        orderId: "O-10023",
-        sku: "COZEY004",
-        state: "QA_PENDING",
-        warehouseId: "wh1"
-      }
-    ]
-  }
-];
-
 // src/domain/orders/order.repository.ts
+var orders = [];
 var OrderRepository = class {
-  /** BASIC ORDER CRUD */
-  async listOrders() {
+  listOrders() {
     return orders;
   }
-  async findById(id) {
+  findById(id) {
     return orders.find((o) => o.id === id) || null;
   }
-  async saveOrder(order) {
+  saveOrder(order) {
     const idx = orders.findIndex((o) => o.id === order.id);
-    if (idx === -1) {
-      orders.push(order);
-    } else {
-      orders[idx] = order;
-    }
+    if (idx === -1) orders.push(order);
+    else orders[idx] = order;
   }
-  /** BOX HELPERS */
-  async listBoxes() {
+  updateOrder(order) {
+    this.saveOrder(order);
+  }
+  createOrder(data) {
+    const id = data.id ?? `O-${Date.now()}`;
+    const newOrder = {
+      id,
+      customerId: data.customerId ?? `C-${Date.now()}`,
+      customerName: data.customerName ?? "Simulated Customer",
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+      destination: data.destination,
+      status: "PENDING",
+      routes: data.routes ?? {},
+      boxes: data.boxes ?? []
+    };
+    orders.push(newOrder);
+    return newOrder;
+  }
+  listBoxes() {
     return orders.flatMap((o) => o.boxes);
   }
-  async findOrderByBoxId(boxId) {
-    for (const order of orders) {
-      if (order.boxes.some((b) => b.id === boxId)) return order;
-    }
-    return null;
+  findOrderByBoxId(boxId) {
+    return orders.find((o) => o.boxes.some((b) => b.id === boxId)) || null;
   }
-  async getBox(boxId) {
+  getBox(boxId) {
     for (const order of orders) {
       const box = order.boxes.find((b) => b.id === boxId);
       if (box) return box;
     }
     return null;
   }
-  /** UPDATE BOX STATE (used by scans / tasks / returns) */
-  async updateBoxState(boxId, newState) {
-    const order = await this.findOrderByBoxId(boxId);
-    if (!order) return null;
-    const box = order.boxes.find((b) => b.id === boxId);
-    if (!box) return null;
-    box.state = newState;
-    await this.saveOrder(order);
-    return box;
-  }
-  /** CLASSIFY RETURN (used by returns flow) */
-  async classifyReturn(boxId, category, notes) {
-    const order = await this.findOrderByBoxId(boxId);
-    if (!order) return null;
-    const box = order.boxes.find((b) => b.id === boxId);
-    if (!box) return null;
-    box.state = "RETURN_CLASSIFIED";
-    box.returnCategory = category;
-    if (notes) box.notes = notes;
-    await this.saveOrder(order);
-    return box;
-  }
-  /** ORDER STATUS RECALC (derived from box states) */
-  async recomputeOrderStatus(orderId) {
-    const order = await this.findById(orderId);
-    if (!order) throw new Error("Order not found");
-    const states = order.boxes.map((b) => b.state);
-    let status = order.status;
-    if (states.every((s) => s === "DELIVERED")) {
-      status = "DELIVERED";
-    } else if (states.every((s) => s === "RETURN_CLASSIFIED")) {
-      status = "RETURNED";
-    } else if (states.some(
-      (s) => ["PICKED", "PACKED", "OUTBOUND", "SHIPPED", "IN_TRANSIT"].includes(s)
-    )) {
-      status = "PARTIAL";
-    } else if (states.every((s) => s === "PENDING")) {
-      status = "PENDING";
+  updateBoxState(boxId, newState) {
+    for (const order of orders) {
+      const box = order.boxes.find((b) => b.id === boxId);
+      if (box) {
+        box.state = newState;
+        return box;
+      }
     }
-    order.status = status;
-    await this.saveOrder(order);
-    return status;
+    return null;
   }
-  /** UPDATE WHOLE ORDER */
-  async updateOrder(order) {
-    await this.saveOrder(order);
+  classifyReturn(boxId, category, notes) {
+    for (const order of orders) {
+      const box = order.boxes.find((b) => b.id === boxId);
+      if (box) {
+        box.returnCategory = category;
+        box.returnNotes = notes;
+        box.state = "QA_DONE";
+        return box;
+      }
+    }
+    return null;
   }
-  /** SEED HOOK (no-op for now, data file already populated) */
-  seedIfEmpty() {
-    if (orders.length > 0) return;
+  async recomputeOrderStatus(orderId) {
+    const order = this.findById(orderId);
+    if (!order) throw new Error("Order not found");
+    const tasks2 = await taskRepo.listTasks();
+    const shipTasks = tasks2.filter((t) => t.orderId === orderId && t.type === "SHIP");
+    const allShipDone = shipTasks.length > 0 && shipTasks.every((t) => t.status === "DONE");
+    console.log(
+      "[ORDER STATUS CHECK]",
+      order.id,
+      "SHIP tasks:",
+      shipTasks.map((t) => t.status)
+    );
+    if (allShipDone) {
+      order.status = "FULFILLED";
+    } else {
+      order.status = "IN_PROGRESS";
+    }
+    this.saveOrder(order);
+    return order.status;
+  }
+  seedIfEmpty(defaults = []) {
+    if (orders.length === 0) orders = [...defaults];
+  }
+};
+
+// src/domain/tasks/task.repository.ts
+var tasks = [];
+var TaskRepository = class {
+  // Always return a fresh array so callers can't mutate the internal store by accident
+  async listTasks() {
+    return [...tasks];
+  }
+  async countActiveTasksForWarehouse(warehouseId) {
+    return tasks.filter(
+      (t) => t.warehouseId === warehouseId && t.status !== "DONE"
+    ).length;
+  }
+  async listTasksForWorker(workerId) {
+    return tasks.filter((t) => t.workerId === workerId);
+  }
+  async getTask(taskId) {
+    return tasks.find((t) => t.id === taskId) ?? null;
+  }
+  async saveTask(task) {
+    const idx = tasks.findIndex((t) => t.id === task.id);
+    if (idx === -1) {
+      tasks.push(task);
+    } else {
+      tasks[idx] = task;
+    }
+  }
+  async createTask(task) {
+    await this.saveTask(task);
+    return task;
+  }
+  async upsertMany(newTasks) {
+    for (const t of newTasks) {
+      const idx = tasks.findIndex((x) => x.id === t.id);
+      if (idx === -1) tasks.push(t);
+      else tasks[idx] = t;
+    }
+  }
+  async updateTaskStatus(taskId, newStatus) {
+    return this.updateStatus(taskId, newStatus);
+  }
+  async updateStatus(taskId, newStatus) {
+    const task = await this.getTask(taskId);
+    if (!task) throw new Error("Task not found");
+    const prevStatus = task.status;
+    task.status = newStatus;
+    await this.saveTask(task);
+    await this.updateBoxStateForTask(task, newStatus);
+    return task;
+  }
+  async assignWorker(taskId, workerId) {
+    const task = await this.getTask(taskId);
+    if (!task) throw new Error("Task not found");
+    task.workerId = workerId;
+    if (task.status === "PENDING_PICK") {
+      return this.updateStatus(task.id, "IN_PROGRESS");
+    }
+    await this.saveTask(task);
+    return task;
+  }
+  seedIfEmpty(defaults = []) {
+    if (!Array.isArray(defaults)) return;
+    if (tasks.length === 0 && defaults.length) {
+      tasks = [...defaults];
+    }
+  }
+  // Optional helper for analytics / debugging
+  async countByStatus() {
+    const result = {};
+    for (const t of tasks) {
+      result[t.status] = (result[t.status] ?? 0) + 1;
+    }
+    return result;
+  }
+  async updateBoxStateForTask(task, status) {
+    const order = orderRepo.findById(task.orderId);
+    if (!order) return;
+    const box = order.boxes.find((b) => b.id === task.boxId);
+    if (!box) return;
+    console.log("[TASK STATUS]", task.id, task.type, "\u2192", status, "for box", task.boxId);
+    if (status === "IN_PROGRESS") {
+      box.state = "PICK_ASSIGNED";
+    } else if (status === "DONE") {
+      if (task.type === "PICK" || !task.type) box.state = "PICKED";
+      else if (task.type === "PACK") box.state = "PACKED";
+      else if (task.type === "SHIP") box.state = "OUTBOUND";
+    }
+    orderRepo.saveOrder(order);
+    await orderRepo.recomputeOrderStatus(order.id);
+    const tasksForBox = tasks.filter(
+      (t) => t.orderId === task.orderId && t.boxId === task.boxId
+    );
+    if (task.type === "PICK" && status === "DONE") {
+      const next = tasksForBox.find(
+        (t) => t.type === "PACK" && t.status === "PENDING"
+      );
+      if (next) {
+        next.status = "PENDING_PICK";
+        this.saveTask(next);
+      }
+    } else if (task.type === "PACK" && status === "DONE") {
+      const next = tasksForBox.find(
+        (t) => t.type === "SHIP" && t.status === "PENDING"
+      );
+      if (next) {
+        next.status = "PENDING_PICK";
+        this.saveTask(next);
+      }
+    } else if (task.type === "SHIP" && status === "DONE") {
+      const order2 = orderRepo.findById(task.orderId);
+      if (order2) {
+        const b = order2.boxes.find((bx) => bx.id === task.boxId);
+        if (b) b.state = "DELIVERED";
+        orderRepo.saveOrder(order2);
+        await orderRepo.recomputeOrderStatus(order2.id);
+      }
+    }
+    console.log("[BOX STATE]", box.id, "now", box.state);
+  }
+  updateInventoryForTask(_task, _prevStatus, _newStatus) {
+  }
+};
+
+// src/domain/workers/worker.repository.ts
+var workers = [];
+var WorkerRepository = class {
+  constructor() {
+    this.rrCursors = {};
+  }
+  listWorkers() {
+    return workers;
+  }
+  listByWarehouse(warehouseId) {
+    return workers.filter((w) => w.warehouseId === warehouseId);
+  }
+  getWorkersByWarehouse(warehouseId) {
+    return this.listByWarehouse(warehouseId);
+  }
+  listByRole(role) {
+    return workers.filter((w) => w.role === role);
+  }
+  findById(id) {
+    return workers.find((w) => w.id === id) || null;
+  }
+  save(worker) {
+    worker.currentLoad = worker.currentLoad ?? worker.currentTasks ?? 0;
+    worker.currentTasks = worker.currentLoad;
+    worker.capacity = worker.capacity ?? worker.maxTasks ?? 0;
+    worker.maxTasks = worker.capacity;
+    worker.active = worker.active ?? true;
+    worker.lastAssignedAt = worker.lastAssignedAt ?? 0;
+    const idx = workers.findIndex((w) => w.id === worker.id);
+    if (idx === -1) workers.push(worker);
+    else workers[idx] = { ...workers[idx], ...worker };
+  }
+  assignTask(workerId, taskId) {
+    const worker = this.findById(workerId);
+    if (!worker) return;
+    worker.activeTaskIds = worker.activeTaskIds ?? [];
+    if (!worker.activeTaskIds.includes(taskId)) {
+      worker.activeTaskIds.push(taskId);
+    }
+    worker.currentLoad = worker.currentLoad ?? 0;
+    worker.currentTasks = worker.currentLoad;
+    this.save(worker);
+  }
+  seedIfEmpty(defaults = []) {
+    if (!Array.isArray(defaults)) return;
+    if (workers.length === 0) {
+      workers = [...defaults];
+    }
+  }
+  updateWorkerLoad(workerId, delta) {
+    const worker = this.findById(workerId);
+    if (worker) {
+      worker.currentLoad = (worker.currentLoad ?? 0) + delta;
+      if (worker.currentLoad < 0) worker.currentLoad = 0;
+      worker.currentTasks = worker.currentLoad;
+      this.save(worker);
+    }
+  }
+  getAvailableWorkers(warehouseId) {
+    return workers.filter(
+      (w) => w.warehouseId === warehouseId && w.active && (w.capacity ?? w.maxTasks ?? 0) > (w.currentLoad ?? 0)
+    ).sort((a, b) => {
+      const loadA = a.currentLoad ?? 0;
+      const loadB = b.currentLoad ?? 0;
+      if (loadA !== loadB) return loadA - loadB;
+      return (a.lastAssignedAt ?? 0) - (b.lastAssignedAt ?? 0);
+    });
+  }
+  pickNextWorkerForTask(warehouseId, taskType) {
+    const zone = taskType === "PICK" ? "PICKING" : taskType === "PACK" ? "PACKING" : "SHIPPING";
+    const eligible = workers.filter(
+      (w) => w.warehouseId === warehouseId && w.active !== false && w.zone === zone && (w.capacity ?? w.maxTasks ?? 0) > (w.currentLoad ?? w.currentTasks ?? 0)
+    );
+    if (eligible.length === 0) return null;
+    const key = `${warehouseId}:${zone}`;
+    const cursor = this.rrCursors[key] ?? 0;
+    const idx = cursor % eligible.length;
+    const chosen = eligible[idx];
+    this.rrCursors[key] = (idx + 1) % eligible.length;
+    chosen.lastAssignedAt = Date.now();
+    this.updateWorkerLoad(chosen.id, 1);
+    this.save(chosen);
+    return chosen;
+  }
+};
+
+// src/config/inventoryThresholds.ts
+var LOW_STOCK_THRESHOLD = 3;
+
+// src/domain/events/eventLogger.service.ts
+var import_crypto = require("crypto");
+
+// src/domain/events/warehouseEvents.repository.ts
+var WarehouseEventsRepository = class {
+  constructor() {
+    this.events = [];
+  }
+  addEvent(event) {
+    this.events.push(event);
+  }
+  getEventsForWarehouse(warehouseId, limit = 50) {
+    const filtered = warehouseId === "ALL" ? this.events : this.events.filter((e) => e.warehouseId === warehouseId);
+    return filtered.slice().sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limit);
+  }
+};
+var warehouseEventsRepo = new WarehouseEventsRepository();
+
+// src/domain/events/sseManager.ts
+var SSEManager = class {
+  constructor() {
+    this.clients = /* @__PURE__ */ new Map();
+    this.globalClients = /* @__PURE__ */ new Set();
+  }
+  addClient(warehouseId, res, origin) {
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+      "Access-Control-Allow-Origin": origin || "*",
+      "Access-Control-Allow-Credentials": "true",
+      Vary: "Origin"
+    });
+    if (warehouseId === "ALL") {
+      this.globalClients.add(res);
+    } else {
+      if (!this.clients.has(warehouseId)) {
+        this.clients.set(warehouseId, /* @__PURE__ */ new Set());
+      }
+      this.clients.get(warehouseId).add(res);
+    }
+    res.write("event: ping\ndata: connected\n\n");
+  }
+  removeClient(warehouseId, res) {
+    if (warehouseId === "ALL") {
+      this.globalClients.delete(res);
+    } else {
+      this.clients.get(warehouseId)?.delete(res);
+    }
+  }
+  send(res, event) {
+    try {
+      res.write(`data: ${JSON.stringify(event)}
+
+`);
+    } catch (err) {
+    }
+  }
+  broadcastTo(warehouseId, event) {
+    this.clients.get(warehouseId)?.forEach((res) => this.send(res, event));
+  }
+  broadcastGlobal(event) {
+    this.globalClients.forEach((res) => this.send(res, event));
+  }
+};
+var sseManager = new SSEManager();
+
+// src/domain/events/eventLogger.service.ts
+var EventLogger = class {
+  log(warehouseId, type, message, meta) {
+    const event = {
+      id: (0, import_crypto.randomUUID)(),
+      warehouseId,
+      type,
+      message,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      meta: meta ?? void 0
+    };
+    warehouseEventsRepo.addEvent(event);
+    sseManager.broadcastTo(warehouseId, event);
+    sseManager.broadcastGlobal(event);
+  }
+  logReturnReceived(warehouseId, boxId) {
+    this.log(warehouseId, "RETURN_RECEIVED", `Return received at ${warehouseId} (${boxId})`, {
+      boxId
+    });
+  }
+  logReturnQAStart(warehouseId, boxId) {
+    this.log(warehouseId, "RETURN_QA_STARTED", `QA started for ${boxId}`, { boxId });
+  }
+  logReturnClassified(warehouseId, boxId, category) {
+    this.log(
+      warehouseId,
+      "RETURN_CLASSIFIED",
+      `QA classified ${boxId}: ${category}`,
+      { boxId, category }
+    );
+  }
+};
+var eventLogger = new EventLogger();
+
+// src/domain/warehouses/warehouse.repository.ts
+var warehouses = [];
+var WarehouseRepository = class {
+  /**
+   * Preferred API: return all warehouses.
+   */
+  listWarehouses() {
+    return warehouses;
+  }
+  /**
+   * Backwards-compatible alias: some services still call repo.list()
+   */
+  list() {
+    return this.listWarehouses();
+  }
+  findById(id) {
+    return warehouses.find((w) => w.id === id) || null;
+  }
+  save(warehouse) {
+    const idx = warehouses.findIndex((w) => w.id === warehouse.id);
+    if (idx === -1) warehouses.push(warehouse);
+    else warehouses[idx] = warehouse;
+  }
+  seedIfEmpty(defaults = []) {
+    if (!Array.isArray(defaults)) return;
+    if (warehouses.length === 0 && defaults.length) {
+      warehouses = [...defaults];
+    }
+  }
+  // Convenience getters/setters used elsewhere
+  getWarehouse(id) {
+    return this.findById(id);
+  }
+  saveWarehouse(warehouse) {
+    this.save(warehouse);
+  }
+  decrementInventory(warehouseId, sku) {
+    const wh = this.findById(warehouseId);
+    if (!wh) return;
+    const current = wh.inventory[sku] ?? 0;
+    wh.inventory[sku] = Math.max(0, current - 1);
+    if (wh.inventory[sku] <= LOW_STOCK_THRESHOLD) {
+      console.warn(`[LOW STOCK] WH ${warehouseId} SKU ${sku} -> qty ${wh.inventory[sku]}`);
+    }
+    this.save(wh);
+    eventLogger.log(
+      warehouseId,
+      "INVENTORY_DECREASED",
+      `Inventory decreased for ${sku} -> ${wh.inventory[sku]}`,
+      { sku, quantity: wh.inventory[sku] }
+    );
+  }
+  incrementInventory(warehouseId, sku) {
+    const wh = this.findById(warehouseId);
+    if (!wh) return;
+    const current = wh.inventory[sku] ?? 0;
+    wh.inventory[sku] = current + 1;
+    this.save(wh);
+    eventLogger.log(
+      warehouseId,
+      "INVENTORY_INCREASED",
+      `Inventory increased for ${sku} -> ${wh.inventory[sku]}`,
+      { sku, quantity: wh.inventory[sku] }
+    );
+  }
+  getLowStock(threshold = LOW_STOCK_THRESHOLD) {
+    const results = [];
+    for (const wh of warehouses) {
+      for (const [sku, qty] of Object.entries(wh.inventory ?? {})) {
+        if (qty <= threshold) {
+          results.push({ warehouseId: wh.id, sku, quantity: qty });
+        }
+      }
+    }
+    return results;
+  }
+  async getInventoryForWarehouse(warehouseId) {
+    const wh = this.findById(warehouseId);
+    if (!wh) return [];
+    const heuristicReorderPoint = (stock) => Math.min(5, Math.max(1, Math.floor(stock / 10)));
+    const items = [];
+    for (const [sku, qty] of Object.entries(wh.inventory ?? {})) {
+      const reorderPoint = heuristicReorderPoint(qty);
+      items.push({
+        sku,
+        warehouseId,
+        currentStock: qty,
+        reorderPoint,
+        capacity: void 0,
+        lowStock: qty <= (reorderPoint ?? LOW_STOCK_THRESHOLD)
+      });
+    }
+    return items;
+  }
+};
+
+// src/domain/backorders/backorder.repository.ts
+var backorders = [];
+var BackorderRepository = class {
+  add(item) {
+    backorders.push(item);
+  }
+  listAll() {
+    return [...backorders];
+  }
+  listByWarehouse(warehouseId) {
+    if (warehouseId === "ALL") return [...backorders];
+    return backorders.filter((b) => b.warehouseId === warehouseId);
+  }
+  listOpen() {
+    return backorders.filter((b) => b.status === "OPEN" || b.status === "PARTIAL");
+  }
+  listOpenByWarehouse(warehouseId) {
+    const open = this.listOpen();
+    if (warehouseId === "ALL") return open;
+    return open.filter((b) => b.warehouseId === warehouseId);
+  }
+};
+
+// src/domain/sharedRepos.ts
+var orderRepo = new OrderRepository();
+var taskRepo = new TaskRepository();
+var workerRepo = new WorkerRepository();
+var warehouseRepo2 = new WarehouseRepository();
+var backorderRepo = new BackorderRepository();
+
+// src/data/canadian_addresses.json
+var canadian_addresses_default = [
+  {
+    street: "200 Boulevard Ren\xE9-L\xE9vesque Ouest",
+    city: "Montreal",
+    province: "QC",
+    postal: "H2Z 1X4",
+    lat: 45.503,
+    lng: -73.572
+  },
+  {
+    street: "1 Front St E",
+    city: "Toronto",
+    province: "ON",
+    postal: "M5E 1B2",
+    lat: 43.6475,
+    lng: -79.3763
+  },
+  {
+    street: "999 Canada Pl",
+    city: "Vancouver",
+    province: "BC",
+    postal: "V6C 3E1",
+    lat: 49.2885,
+    lng: -123.1128
+  },
+  {
+    street: "1231 8 St SW",
+    city: "Calgary",
+    province: "AB",
+    postal: "T2R 1B1",
+    lat: 51.0425,
+    lng: -114.0861
+  },
+  {
+    street: "1650 Bedford Hwy",
+    city: "Halifax",
+    province: "NS",
+    postal: "B4A 2X9",
+    lat: 44.7265,
+    lng: -63.667
+  }
+];
+
+// ../shared/inventory.json
+var inventory_default = {
+  "SOFA-3P-GREY": 20,
+  "SOFA-3P-BEIGE": 15,
+  "SOFA-2P-BLUE": 18,
+  "SOFA-LOVE-GRN": 12,
+  "CHAIR-LOUNGE-GREEN": 14,
+  "CHAIR-ACCENT-YEL": 16,
+  "CHAIR-DINING-BLK": 20,
+  "CHAIR-DINING-OAK": 18,
+  "TABLE-COFFEE-OAK": 15,
+  "TABLE-COFFEE-GLS": 12,
+  "TABLE-DINING-6P": 14,
+  "TABLE-SIDE-WHT": 16,
+  "BED-KING-WHITE": 10,
+  "BED-QUEEN-GREY": 12,
+  "BED-DOUBLE-OAK": 11,
+  "STORAGE-SHELF-5T": 17,
+  "STORAGE-CUBE-9": 19,
+  "MEDIA-UNIT-60": 13,
+  "PILLOW-BLUE": 40,
+  "PILLOW-WHITE": 32,
+  "RUG-160x230-BEIGE": 14,
+  "LAMP-DESK-LED": 30
+};
+
+// src/utils/inventory.ts
+var INVENTORY = { ...inventory_default };
+
+// src/seed/warehouses.seed.ts
+var toronto = canadian_addresses_default.find((a) => a.city === "Toronto");
+var montreal = canadian_addresses_default.find((a) => a.city === "Montreal");
+var vancouver = canadian_addresses_default.find((a) => a.city === "Vancouver");
+var calgary = canadian_addresses_default.find((a) => a.city === "Calgary");
+var warehouseSeed = [
+  {
+    id: "WH-TOR-01",
+    name: "Toronto Fulfillment Hub",
+    location: {
+      line1: toronto?.street ?? "1 Front St E",
+      city: toronto?.city ?? "Toronto",
+      province: toronto?.province ?? "ON",
+      postal: toronto?.postal ?? "M5E 1B2",
+      lat: toronto?.lat ?? 43.6475,
+      lng: toronto?.lng ?? -79.3763
+    },
+    activeWorkerCount: 10,
+    dailyCapacity: 700,
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    inventory: { ...INVENTORY }
+  },
+  {
+    id: "WH-MTL-01",
+    name: "Montreal Fulfillment Hub",
+    location: {
+      line1: montreal?.street ?? "200 Boulevard Ren\xE9-L\xE9vesque Ouest",
+      city: montreal?.city ?? "Montreal",
+      province: montreal?.province ?? "QC",
+      postal: montreal?.postal ?? "H2Z 1X4",
+      lat: montreal?.lat ?? 45.503,
+      lng: montreal?.lng ?? -73.572
+    },
+    activeWorkerCount: 10,
+    dailyCapacity: 650,
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    inventory: { ...INVENTORY }
+  },
+  {
+    id: "WH-VAN-01",
+    name: "Vancouver Pacific Warehouse",
+    location: {
+      line1: vancouver?.street ?? "999 Canada Pl",
+      city: vancouver?.city ?? "Vancouver",
+      province: vancouver?.province ?? "BC",
+      postal: vancouver?.postal ?? "V6C 3E1",
+      lat: vancouver?.lat ?? 49.2885,
+      lng: vancouver?.lng ?? -123.1128
+    },
+    activeWorkerCount: 10,
+    dailyCapacity: 600,
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    inventory: { ...INVENTORY }
+  },
+  {
+    id: "WH-CGY-01",
+    name: "Calgary Prairie Logistics Center",
+    location: {
+      line1: calgary?.street ?? "1231 8 St SW",
+      city: calgary?.city ?? "Calgary",
+      province: calgary?.province ?? "AB",
+      postal: calgary?.postal ?? "T2R 1B1",
+      lat: calgary?.lat ?? 51.0425,
+      lng: calgary?.lng ?? -114.0861
+    },
+    activeWorkerCount: 10,
+    dailyCapacity: 550,
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    inventory: { ...INVENTORY }
+  }
+];
+
+// src/domain/ai/distance.ts
+function haversineDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const toRad = (deg) => deg * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// src/data/skus.json
+var skus_default = {
+  "SOFA-3P-GREY": true,
+  "SOFA-3P-BEIGE": true,
+  "SOFA-2P-BLUE": true,
+  "SOFA-LOVE-GRN": true,
+  "CHAIR-LOUNGE-GREEN": true,
+  "CHAIR-ACCENT-YEL": true,
+  "CHAIR-DINING-BLK": true,
+  "CHAIR-DINING-OAK": true,
+  "TABLE-COFFEE-OAK": true,
+  "TABLE-COFFEE-GLS": true,
+  "TABLE-DINING-6P": true,
+  "TABLE-SIDE-WHT": true,
+  "BED-KING-WHITE": true,
+  "BED-QUEEN-GREY": true,
+  "BED-DOUBLE-OAK": true,
+  "STORAGE-SHELF-5T": true,
+  "STORAGE-CUBE-9": true,
+  "MEDIA-UNIT-60": true,
+  "PILLOW-BLUE": true,
+  "PILLOW-WHITE": true,
+  "RUG-160x230-BEIGE": true,
+  "LAMP-DESK-LED": true
+};
+
+// src/utils/skuList.ts
+var ALL_SKUS = Object.keys(skus_default);
+var randomSKU = () => ALL_SKUS[Math.floor(Math.random() * ALL_SKUS.length)];
+
+// src/domain/ai/assignment.service.ts
+var AssignmentService = class {
+  constructor() {
+    this.workerRepo = workerRepo;
+    this.taskRepo = taskRepo;
+    this.orderRepo = orderRepo;
+    this.warehouseRepo = warehouseRepo2;
+  }
+  /**
+   * AI warehouse selection:
+   * - Distance to customer
+   * - Remaining capacity (dailyCapacity - active tasks)
+   * - Idle workers at that warehouse
+   */
+  async assignWarehouse(input) {
+    const { lat, lng, skuList } = input;
+    const repoWarehouses = this.warehouseRepo.listWarehouses();
+    const pool = repoWarehouses.length > 0 ? repoWarehouses : warehouseSeed;
+    if (pool.length === 0) return null;
+    let best = null;
+    let bestScore = -Infinity;
+    for (const wh of pool) {
+      const distKm = haversineDistanceKm(
+        lat,
+        lng,
+        wh.location.lat,
+        wh.location.lng
+      );
+      const distScore = Math.max(0, 50 - distKm);
+      const workers2 = this.workerRepo.getWorkersByWarehouse(wh.id);
+      const idleWorkers = workers2.filter(
+        (w) => (w.currentLoad ?? w.currentTasks ?? 0) < (w.capacity ?? w.maxTasks ?? 0) && w.active !== false
+      ).length;
+      const workerScore = idleWorkers * 2;
+      const activeTasks = await this.taskRepo.countActiveTasksForWarehouse(
+        wh.id
+      );
+      const remainingCapacity = Math.max(0, wh.dailyCapacity - activeTasks);
+      const loadScore = remainingCapacity / 50;
+      const coverageCount = skuList.reduce((count, sku) => {
+        const stock = wh.inventory?.[sku] ?? 0;
+        return stock > 0 ? count + 1 : count;
+      }, 0);
+      const coverageScore = coverageCount * 10;
+      const total = distScore + workerScore + loadScore + coverageScore;
+      if (total > bestScore) {
+        bestScore = total;
+        best = wh;
+      }
+    }
+    return best;
+  }
+  /**
+   * For a given order+warehouse, create PICK tasks for each box.
+   */
+  async generateTasksForWarehouse(orderId, warehouseId, boxes) {
+    const createdAt = (/* @__PURE__ */ new Date()).toISOString();
+    const createdTasks = [];
+    const repoWarehouse = this.warehouseRepo.findById(warehouseId);
+    const wh = repoWarehouse ?? warehouseSeed.find((w) => w.id === warehouseId);
+    for (const box of boxes) {
+      console.log("---- TASK GEN START ----");
+      console.log("Order:", orderId);
+      console.log("Box:", box.id, "SKU:", box.sku);
+      console.log("Warehouse:", warehouseId);
+      console.log("Warehouse inventory snapshot:", wh?.inventory);
+      console.log("Stock for SKU:", wh?.inventory?.[box.sku ?? "UNKNOWN"]);
+      console.log("------------------------");
+      const stock = wh?.inventory?.[box.sku ?? "UNKNOWN"] ?? 0;
+      if (stock <= LOW_STOCK_THRESHOLD) {
+        console.log(
+          `[LOW STOCK WARNING] SKU ${box.sku} has only ${stock} items left in ${warehouseId}`
+        );
+      }
+      if (stock <= 0) {
+        console.log("[TASK GEN] skipping box", box.id, "sku", box.sku, "no stock in", warehouseId);
+        backorderRepo.add({
+          warehouseId,
+          orderId,
+          boxId: box.id,
+          sku: box.sku ?? "UNKNOWN",
+          requestedQty: 1,
+          createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+          reason: "INSUFFICIENT_STOCK"
+        });
+        eventLogger.log(
+          warehouseId,
+          "BACKORDER_CREATED",
+          `Backorder for order ${orderId} box ${box.id} sku ${box.sku}`,
+          { orderId, boxId: box.id, sku: box.sku }
+        );
+        continue;
+      }
+      console.log("\u2705 Creating PICK/PACK/SHIP for box:", box.id);
+      const pick = await this.taskRepo.createTask({
+        id: `T-${orderId}-${box.id}-1`,
+        orderId,
+        boxId: box.id,
+        warehouseId,
+        workerId: null,
+        status: "PENDING_PICK",
+        type: "PICK",
+        createdAt
+      });
+      const pack = await this.taskRepo.createTask({
+        id: `T-${orderId}-${box.id}-2`,
+        orderId,
+        boxId: box.id,
+        warehouseId,
+        workerId: null,
+        status: "PENDING",
+        type: "PACK",
+        createdAt
+      });
+      const ship = await this.taskRepo.createTask({
+        id: `T-${orderId}-${box.id}-3`,
+        orderId,
+        boxId: box.id,
+        warehouseId,
+        workerId: null,
+        status: "PENDING",
+        type: "SHIP",
+        createdAt
+      });
+      createdTasks.push(pick, pack, ship);
+      eventLogger.log(
+        warehouseId,
+        "TASK_CREATED",
+        `Tasks created for order ${orderId} box ${box.id}`,
+        { orderId, boxId: box.id }
+      );
+      if (wh && box.sku && wh.inventory?.[box.sku] != null) {
+        wh.inventory[box.sku] = Math.max(0, (wh.inventory[box.sku] ?? 0) - 1);
+      }
+    }
+    console.log("[TASK GEN] created", createdTasks.length, "tasks for order", orderId, "at warehouse", warehouseId);
+    return createdTasks;
+  }
+  /**
+   * Auto-assign all PENDING_PICK tasks using round-robin per warehouse/zone.
+   * Moves assigned tasks to IN_PROGRESS. PACK/SHIP tasks are created but not auto-assigned here.
+   */
+  async autoAssignTasks() {
+    const tasks2 = (await this.taskRepo.listTasks()).filter(
+      (t) => t.status === "PENDING_PICK"
+    );
+    if (tasks2.length === 0) return [];
+    const assignments = [];
+    for (const t of tasks2) {
+      const chosen = this.workerRepo.pickNextWorkerForTask(
+        t.warehouseId,
+        t.type
+      );
+      if (!chosen) continue;
+      this.workerRepo.assignTask(chosen.id, t.id);
+      t.workerId = chosen.id;
+      t.status = "IN_PROGRESS";
+      await this.taskRepo.saveTask(t);
+      assignments.push({ taskId: t.id, workerId: chosen.id, workerName: chosen.name });
+      eventLogger.log(
+        t.warehouseId,
+        "TASK_ASSIGNED",
+        `Task ${t.id} assigned to worker ${chosen.id}`,
+        { taskId: t.id, workerId: chosen.id }
+      );
+    }
+    return assignments;
+  }
+  /**
+   * Used by simulator / integrations:
+   * - Pick a warehouse
+   * - Create boxes
+   * - Save order
+   * - Generate tasks
+   * - Auto-assign workers
+   */
+  async createIncomingOrder(payload) {
+    const orderId = payload.orderId ?? `SIM-${Date.now()}`;
+    const incomingBoxes = payload.boxes && payload.boxes.length > 0 ? payload.boxes : Array.from({
+      length: Math.max(1, Math.floor(Math.random() * 3) + 1)
+    }).map((_v, idx) => ({
+      id: `${orderId}-BOX-${idx + 1}`,
+      sku: randomSKU()
+    }));
+    const warehouse = await this.assignWarehouse({
+      lat: payload.destination.lat,
+      lng: payload.destination.lng,
+      skuList: incomingBoxes.map((b) => b.sku ?? "UNKNOWN")
+    });
+    if (!warehouse) throw new Error("No available warehouse");
+    const boxes = incomingBoxes.map((b) => ({
+      id: b.id,
+      orderId,
+      sku: b.sku,
+      warehouseId: warehouse.id,
+      state: "PENDING"
+    }));
+    const order = {
+      id: orderId,
+      customerId: "SIM-CUST",
+      customerName: payload.customerName ?? "Simulator",
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+      status: "PENDING",
+      routes: {
+        [warehouse.id]: boxes.map((b) => b.id)
+      },
+      boxes
+    };
+    this.orderRepo.saveOrder(order);
+    console.log("[SIM ORDER]", order.id, "boxes", boxes.map((b) => b.sku), "warehouse", warehouse.id);
+    const tasks2 = await this.generateTasksForWarehouse(orderId, warehouse.id, boxes);
+    console.log("[SIM TASKS CREATED]", tasks2.length, "for order", orderId);
+    await this.autoAssignTasks();
+    return { order, warehouse };
   }
 };
 
 // src/domain/orders/order.service.ts
-var repo = new OrderRepository();
 var OrderService = class {
+  constructor() {
+    this.assignment = new AssignmentService();
+  }
   async listOrders() {
-    return repo.listOrders();
+    const orders2 = orderRepo.listOrders();
+    const tasks2 = await taskRepo.listTasks();
+    const enriched = orders2.map((o) => ({
+      ...o,
+      tasks: tasks2.filter((t) => t.orderId === o.id)
+    }));
+    return enriched;
   }
   async getOrder(id) {
-    const order = await repo.findById(id);
+    const order = await orderRepo.findById(id);
     if (!order) throw new Error("Order not found");
-    return order;
+    const tasks2 = await taskRepo.listTasks();
+    return { ...order, tasks: tasks2.filter((t) => t.orderId === id) };
+  }
+  async createOrder(data) {
+    const orderId = data.id ?? `ORD-${Date.now()}`;
+    const destination = data.destination ?? data.destinationAddress ?? {
+      line1: "200 Boulevard Ren\xE9-L\xE9vesque Ouest",
+      city: "Montreal",
+      province: "QC",
+      postal: "H2Z 1X4",
+      lat: 45.503,
+      lng: -73.572,
+      address: "200 Boulevard Ren\xE9-L\xE9vesque Ouest"
+    };
+    let boxes = [];
+    if (Array.isArray(data.boxes) && data.boxes.length > 0) {
+      boxes = data.boxes.map((b, idx) => ({
+        id: b.id ?? `${orderId}-BOX-${idx + 1}`,
+        orderId,
+        sku: b.sku ?? "UNKNOWN",
+        state: b.state ?? "PENDING",
+        warehouseId: b.warehouseId
+      }));
+      const invalid = boxes.find((b) => b.sku && !ALL_SKUS.includes(b.sku));
+      if (invalid) throw new Error(`Unknown SKU: ${invalid.sku}`);
+    } else if (Array.isArray(data.items) && data.items.length > 0) {
+      data.items.forEach((item, idx) => {
+        const qty = item.qty ?? 1;
+        if (!ALL_SKUS.includes(item.sku)) {
+          throw new Error(`Unknown SKU: ${item.sku}`);
+        }
+        for (let i = 0; i < qty; i++) {
+          boxes.push({
+            id: `${orderId}-BOX-${idx + 1}-${i + 1}`,
+            orderId,
+            sku: item.sku ?? "UNKNOWN",
+            state: "PENDING"
+          });
+        }
+      });
+    } else {
+      boxes.push({
+        id: `${orderId}-BOX-1`,
+        orderId,
+        sku: "UNKNOWN",
+        state: "PENDING"
+      });
+    }
+    const warehouse = await this.assignment.assignWarehouse({
+      lat: destination.lat,
+      lng: destination.lng,
+      skuList: boxes.map((b) => b.sku)
+    });
+    if (!warehouse) throw new Error("No available warehouse");
+    boxes = boxes.map((b) => ({ ...b, warehouseId: warehouse.id }));
+    const routes = {
+      [warehouse.id]: boxes.map((b) => b.id)
+    };
+    const order = {
+      id: orderId,
+      customerId: data.customerId ?? `C-${Date.now()}`,
+      customerName: data.customerName ?? "Simulator Customer",
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+      destination: {
+        line1: destination.line1 ?? destination.street ?? destination.address ?? "Unknown",
+        city: destination.city ?? "Unknown",
+        province: destination.province,
+        postal: destination.postal ?? "Unknown",
+        lat: destination.lat,
+        lng: destination.lng,
+        street: destination.street ?? destination.line1,
+        address: destination.address ?? destination.line1 ?? destination.street ?? "Unknown"
+      },
+      status: "PENDING",
+      routes,
+      boxes
+    };
+    orderRepo.saveOrder(order);
+    eventLogger.log(
+      warehouse.id,
+      "ORDER_CREATED",
+      `Order ${order.id} created for customer ${order.customerName}`,
+      { orderId: order.id, customerId: order.customerId }
+    );
+    const tasks2 = await this.assignment.generateTasksForWarehouse(
+      orderId,
+      warehouse.id,
+      boxes
+    );
+    await this.assignment.autoAssignTasks();
+    orderRepo.saveOrder(order);
+    return { order, tasks: tasks2, warehouse };
   }
   async updateStatusDerived(orderId) {
-    return repo.recomputeOrderStatus(orderId);
+    return orderRepo.recomputeOrderStatus(orderId);
   }
-  /** Returns boxes that are in the returns/QA pipeline */
   async getReturnCandidates() {
-    const boxes = await repo.listBoxes();
+    const boxes = await orderRepo.listBoxes();
     return boxes.filter(
       (b) => ["QA_PENDING", "QA_IN_PROGRESS", "QA_DONE"].includes(b.state)
     );
   }
-  /** Called by /returns/scan */
   async processReturnCheckIn(params) {
     const { boxId, warehouseId } = params;
-    const box = await repo.updateBoxState(boxId, "QA_PENDING");
+    const box = await orderRepo.updateBoxState(boxId, "QA_PENDING");
     if (!box) throw new Error("Box not found for return check-in");
     if (!box.warehouseId) {
       box.warehouseId = warehouseId;
-      const order = await repo.findOrderByBoxId(boxId);
-      if (order) await repo.updateOrder(order);
+      const order = await orderRepo.findOrderByBoxId(boxId);
+      if (order) await orderRepo.updateOrder(order);
     }
-    await repo.recomputeOrderStatus(box.orderId);
+    await orderRepo.recomputeOrderStatus(box.orderId);
     return { ...box, message: "Return received + QA pending" };
   }
-  /** Called by /returns/:boxId/classify */
   async classifyReturn(params) {
-    const { boxId, category, notes } = params;
-    const box = await repo.classifyReturn(boxId, category, notes);
-    if (!box) throw new Error("Box not found for classification");
-    await repo.recomputeOrderStatus(box.orderId);
+    const box = await orderRepo.classifyReturn(
+      params.boxId,
+      params.category,
+      params.notes
+    );
+    if (!box) throw new Error("Box not found");
+    await orderRepo.recomputeOrderStatus(box.orderId);
     return box;
   }
 };
 
 // src/api/controllers/orders.controller.ts
 var service = new OrderService();
-var getOrders = async (_req, res) => {
+var getOrders = async (req, res) => {
   try {
-    const orders2 = await service.listOrders();
-    res.json(orders2);
+    const user = req.user;
+    const allOrders = await service.listOrders();
+    let visibleOrders = allOrders;
+    if (user?.role === "WORKER" && user.warehouseId) {
+      visibleOrders = allOrders.map((o) => ({
+        ...o,
+        tasks: (o.tasks || []).filter(
+          (t) => t.warehouseId === user.warehouseId
+        )
+      })).filter((o) => (o.tasks?.length ?? 0) > 0);
+    }
+    console.log(
+      "[ORDERS API] Returning",
+      visibleOrders.length,
+      "orders with tasks"
+    );
+    visibleOrders.forEach(
+      (o) => console.log(
+        "[ORDERS API] Order",
+        o.id,
+        "has",
+        o.tasks?.length ?? 0,
+        "tasks"
+      )
+    );
+    res.json(visibleOrders);
   } catch (err) {
     console.error("getOrders failed:", err);
     res.status(500).json({ error: err.message });
@@ -28250,10 +29154,47 @@ var getOrders = async (_req, res) => {
 };
 var getOrderById = async (req, res) => {
   try {
+    const user = req.user;
     const order = await service.getOrder(req.params.id);
+    const tasks2 = order.tasks || [];
+    if (user?.role === "WORKER" && user.warehouseId) {
+      order.tasks = tasks2.filter(
+        (t) => t.warehouseId === user.warehouseId
+      );
+      if ((order.tasks?.length ?? 0) === 0) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+    }
+    console.log(
+      "[ORDERS API] Order",
+      order.id,
+      "has",
+      order.tasks?.length ?? 0,
+      "tasks"
+    );
     res.json(order);
   } catch (err) {
     res.status(404).json({ error: err.message });
+  }
+};
+var createOrder = async (req, res) => {
+  try {
+    const body = req.body || {};
+    const normalized = {
+      customerName: body.customerName ?? body.name ?? "Unknown",
+      destination: body.destination ?? {
+        city: body.destination?.city ?? "Unknown",
+        lat: body.destination?.lat ?? 0,
+        lng: body.destination?.lng ?? 0
+      },
+      items: body.items ?? body.boxes ?? [],
+      ...body
+    };
+    const result = await service.createOrder(normalized);
+    res.status(201).json(result);
+  } catch (err) {
+    console.error("createOrder error:", err);
+    res.status(400).json({ error: err.message });
   }
 };
 var updateOrderStatus = async (req, res) => {
@@ -28264,9 +29205,6 @@ var updateOrderStatus = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
-var createOrder = async (req, res) => {
-  res.status(501).json({ error: "Order creation not implemented in demo" });
-};
 var deleteOrder = async (_req, res) => {
   res.json({ message: "Order deletion not implemented" });
 };
@@ -28274,14 +29212,1738 @@ var deleteOrder = async (_req, res) => {
 // src/domain/auth/auth.service.ts
 var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
 
+// ../node_modules/bcryptjs/index.js
+var import_crypto2 = __toESM(require("crypto"), 1);
+var randomFallback = null;
+function randomBytes(len) {
+  try {
+    return crypto.getRandomValues(new Uint8Array(len));
+  } catch {
+  }
+  try {
+    return import_crypto2.default.randomBytes(len);
+  } catch {
+  }
+  if (!randomFallback) {
+    throw Error(
+      "Neither WebCryptoAPI nor a crypto module is available. Use bcrypt.setRandomFallback to set an alternative"
+    );
+  }
+  return randomFallback(len);
+}
+function setRandomFallback(random) {
+  randomFallback = random;
+}
+function genSaltSync(rounds, seed_length) {
+  rounds = rounds || GENSALT_DEFAULT_LOG2_ROUNDS;
+  if (typeof rounds !== "number")
+    throw Error(
+      "Illegal arguments: " + typeof rounds + ", " + typeof seed_length
+    );
+  if (rounds < 4) rounds = 4;
+  else if (rounds > 31) rounds = 31;
+  var salt = [];
+  salt.push("$2b$");
+  if (rounds < 10) salt.push("0");
+  salt.push(rounds.toString());
+  salt.push("$");
+  salt.push(base64_encode(randomBytes(BCRYPT_SALT_LEN), BCRYPT_SALT_LEN));
+  return salt.join("");
+}
+function genSalt(rounds, seed_length, callback) {
+  if (typeof seed_length === "function")
+    callback = seed_length, seed_length = void 0;
+  if (typeof rounds === "function") callback = rounds, rounds = void 0;
+  if (typeof rounds === "undefined") rounds = GENSALT_DEFAULT_LOG2_ROUNDS;
+  else if (typeof rounds !== "number")
+    throw Error("illegal arguments: " + typeof rounds);
+  function _async(callback2) {
+    nextTick(function() {
+      try {
+        callback2(null, genSaltSync(rounds));
+      } catch (err) {
+        callback2(err);
+      }
+    });
+  }
+  if (callback) {
+    if (typeof callback !== "function")
+      throw Error("Illegal callback: " + typeof callback);
+    _async(callback);
+  } else
+    return new Promise(function(resolve, reject) {
+      _async(function(err, res) {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(res);
+      });
+    });
+}
+function hashSync(password, salt) {
+  if (typeof salt === "undefined") salt = GENSALT_DEFAULT_LOG2_ROUNDS;
+  if (typeof salt === "number") salt = genSaltSync(salt);
+  if (typeof password !== "string" || typeof salt !== "string")
+    throw Error("Illegal arguments: " + typeof password + ", " + typeof salt);
+  return _hash(password, salt);
+}
+function hash(password, salt, callback, progressCallback) {
+  function _async(callback2) {
+    if (typeof password === "string" && typeof salt === "number")
+      genSalt(salt, function(err, salt2) {
+        _hash(password, salt2, callback2, progressCallback);
+      });
+    else if (typeof password === "string" && typeof salt === "string")
+      _hash(password, salt, callback2, progressCallback);
+    else
+      nextTick(
+        callback2.bind(
+          this,
+          Error("Illegal arguments: " + typeof password + ", " + typeof salt)
+        )
+      );
+  }
+  if (callback) {
+    if (typeof callback !== "function")
+      throw Error("Illegal callback: " + typeof callback);
+    _async(callback);
+  } else
+    return new Promise(function(resolve, reject) {
+      _async(function(err, res) {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(res);
+      });
+    });
+}
+function safeStringCompare(known, unknown) {
+  var diff = known.length ^ unknown.length;
+  for (var i = 0; i < known.length; ++i) {
+    diff |= known.charCodeAt(i) ^ unknown.charCodeAt(i);
+  }
+  return diff === 0;
+}
+function compareSync(password, hash2) {
+  if (typeof password !== "string" || typeof hash2 !== "string")
+    throw Error("Illegal arguments: " + typeof password + ", " + typeof hash2);
+  if (hash2.length !== 60) return false;
+  return safeStringCompare(
+    hashSync(password, hash2.substring(0, hash2.length - 31)),
+    hash2
+  );
+}
+function compare(password, hashValue, callback, progressCallback) {
+  function _async(callback2) {
+    if (typeof password !== "string" || typeof hashValue !== "string") {
+      nextTick(
+        callback2.bind(
+          this,
+          Error(
+            "Illegal arguments: " + typeof password + ", " + typeof hashValue
+          )
+        )
+      );
+      return;
+    }
+    if (hashValue.length !== 60) {
+      nextTick(callback2.bind(this, null, false));
+      return;
+    }
+    hash(
+      password,
+      hashValue.substring(0, 29),
+      function(err, comp) {
+        if (err) callback2(err);
+        else callback2(null, safeStringCompare(comp, hashValue));
+      },
+      progressCallback
+    );
+  }
+  if (callback) {
+    if (typeof callback !== "function")
+      throw Error("Illegal callback: " + typeof callback);
+    _async(callback);
+  } else
+    return new Promise(function(resolve, reject) {
+      _async(function(err, res) {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(res);
+      });
+    });
+}
+function getRounds(hash2) {
+  if (typeof hash2 !== "string")
+    throw Error("Illegal arguments: " + typeof hash2);
+  return parseInt(hash2.split("$")[2], 10);
+}
+function getSalt(hash2) {
+  if (typeof hash2 !== "string")
+    throw Error("Illegal arguments: " + typeof hash2);
+  if (hash2.length !== 60)
+    throw Error("Illegal hash length: " + hash2.length + " != 60");
+  return hash2.substring(0, 29);
+}
+function truncates(password) {
+  if (typeof password !== "string")
+    throw Error("Illegal arguments: " + typeof password);
+  return utf8Length(password) > 72;
+}
+var nextTick = typeof setImmediate === "function" ? setImmediate : typeof scheduler === "object" && typeof scheduler.postTask === "function" ? scheduler.postTask.bind(scheduler) : setTimeout;
+function utf8Length(string) {
+  var len = 0, c = 0;
+  for (var i = 0; i < string.length; ++i) {
+    c = string.charCodeAt(i);
+    if (c < 128) len += 1;
+    else if (c < 2048) len += 2;
+    else if ((c & 64512) === 55296 && (string.charCodeAt(i + 1) & 64512) === 56320) {
+      ++i;
+      len += 4;
+    } else len += 3;
+  }
+  return len;
+}
+function utf8Array(string) {
+  var offset = 0, c1, c2;
+  var buffer = new Array(utf8Length(string));
+  for (var i = 0, k = string.length; i < k; ++i) {
+    c1 = string.charCodeAt(i);
+    if (c1 < 128) {
+      buffer[offset++] = c1;
+    } else if (c1 < 2048) {
+      buffer[offset++] = c1 >> 6 | 192;
+      buffer[offset++] = c1 & 63 | 128;
+    } else if ((c1 & 64512) === 55296 && ((c2 = string.charCodeAt(i + 1)) & 64512) === 56320) {
+      c1 = 65536 + ((c1 & 1023) << 10) + (c2 & 1023);
+      ++i;
+      buffer[offset++] = c1 >> 18 | 240;
+      buffer[offset++] = c1 >> 12 & 63 | 128;
+      buffer[offset++] = c1 >> 6 & 63 | 128;
+      buffer[offset++] = c1 & 63 | 128;
+    } else {
+      buffer[offset++] = c1 >> 12 | 224;
+      buffer[offset++] = c1 >> 6 & 63 | 128;
+      buffer[offset++] = c1 & 63 | 128;
+    }
+  }
+  return buffer;
+}
+var BASE64_CODE = "./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".split("");
+var BASE64_INDEX = [
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  0,
+  1,
+  54,
+  55,
+  56,
+  57,
+  58,
+  59,
+  60,
+  61,
+  62,
+  63,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+  28,
+  29,
+  30,
+  31,
+  32,
+  33,
+  34,
+  35,
+  36,
+  37,
+  38,
+  39,
+  40,
+  41,
+  42,
+  43,
+  44,
+  45,
+  46,
+  47,
+  48,
+  49,
+  50,
+  51,
+  52,
+  53,
+  -1,
+  -1,
+  -1,
+  -1,
+  -1
+];
+function base64_encode(b, len) {
+  var off = 0, rs = [], c1, c2;
+  if (len <= 0 || len > b.length) throw Error("Illegal len: " + len);
+  while (off < len) {
+    c1 = b[off++] & 255;
+    rs.push(BASE64_CODE[c1 >> 2 & 63]);
+    c1 = (c1 & 3) << 4;
+    if (off >= len) {
+      rs.push(BASE64_CODE[c1 & 63]);
+      break;
+    }
+    c2 = b[off++] & 255;
+    c1 |= c2 >> 4 & 15;
+    rs.push(BASE64_CODE[c1 & 63]);
+    c1 = (c2 & 15) << 2;
+    if (off >= len) {
+      rs.push(BASE64_CODE[c1 & 63]);
+      break;
+    }
+    c2 = b[off++] & 255;
+    c1 |= c2 >> 6 & 3;
+    rs.push(BASE64_CODE[c1 & 63]);
+    rs.push(BASE64_CODE[c2 & 63]);
+  }
+  return rs.join("");
+}
+function base64_decode(s, len) {
+  var off = 0, slen = s.length, olen = 0, rs = [], c1, c2, c3, c4, o, code;
+  if (len <= 0) throw Error("Illegal len: " + len);
+  while (off < slen - 1 && olen < len) {
+    code = s.charCodeAt(off++);
+    c1 = code < BASE64_INDEX.length ? BASE64_INDEX[code] : -1;
+    code = s.charCodeAt(off++);
+    c2 = code < BASE64_INDEX.length ? BASE64_INDEX[code] : -1;
+    if (c1 == -1 || c2 == -1) break;
+    o = c1 << 2 >>> 0;
+    o |= (c2 & 48) >> 4;
+    rs.push(String.fromCharCode(o));
+    if (++olen >= len || off >= slen) break;
+    code = s.charCodeAt(off++);
+    c3 = code < BASE64_INDEX.length ? BASE64_INDEX[code] : -1;
+    if (c3 == -1) break;
+    o = (c2 & 15) << 4 >>> 0;
+    o |= (c3 & 60) >> 2;
+    rs.push(String.fromCharCode(o));
+    if (++olen >= len || off >= slen) break;
+    code = s.charCodeAt(off++);
+    c4 = code < BASE64_INDEX.length ? BASE64_INDEX[code] : -1;
+    o = (c3 & 3) << 6 >>> 0;
+    o |= c4;
+    rs.push(String.fromCharCode(o));
+    ++olen;
+  }
+  var res = [];
+  for (off = 0; off < olen; off++) res.push(rs[off].charCodeAt(0));
+  return res;
+}
+var BCRYPT_SALT_LEN = 16;
+var GENSALT_DEFAULT_LOG2_ROUNDS = 10;
+var BLOWFISH_NUM_ROUNDS = 16;
+var MAX_EXECUTION_TIME = 100;
+var P_ORIG = [
+  608135816,
+  2242054355,
+  320440878,
+  57701188,
+  2752067618,
+  698298832,
+  137296536,
+  3964562569,
+  1160258022,
+  953160567,
+  3193202383,
+  887688300,
+  3232508343,
+  3380367581,
+  1065670069,
+  3041331479,
+  2450970073,
+  2306472731
+];
+var S_ORIG = [
+  3509652390,
+  2564797868,
+  805139163,
+  3491422135,
+  3101798381,
+  1780907670,
+  3128725573,
+  4046225305,
+  614570311,
+  3012652279,
+  134345442,
+  2240740374,
+  1667834072,
+  1901547113,
+  2757295779,
+  4103290238,
+  227898511,
+  1921955416,
+  1904987480,
+  2182433518,
+  2069144605,
+  3260701109,
+  2620446009,
+  720527379,
+  3318853667,
+  677414384,
+  3393288472,
+  3101374703,
+  2390351024,
+  1614419982,
+  1822297739,
+  2954791486,
+  3608508353,
+  3174124327,
+  2024746970,
+  1432378464,
+  3864339955,
+  2857741204,
+  1464375394,
+  1676153920,
+  1439316330,
+  715854006,
+  3033291828,
+  289532110,
+  2706671279,
+  2087905683,
+  3018724369,
+  1668267050,
+  732546397,
+  1947742710,
+  3462151702,
+  2609353502,
+  2950085171,
+  1814351708,
+  2050118529,
+  680887927,
+  999245976,
+  1800124847,
+  3300911131,
+  1713906067,
+  1641548236,
+  4213287313,
+  1216130144,
+  1575780402,
+  4018429277,
+  3917837745,
+  3693486850,
+  3949271944,
+  596196993,
+  3549867205,
+  258830323,
+  2213823033,
+  772490370,
+  2760122372,
+  1774776394,
+  2652871518,
+  566650946,
+  4142492826,
+  1728879713,
+  2882767088,
+  1783734482,
+  3629395816,
+  2517608232,
+  2874225571,
+  1861159788,
+  326777828,
+  3124490320,
+  2130389656,
+  2716951837,
+  967770486,
+  1724537150,
+  2185432712,
+  2364442137,
+  1164943284,
+  2105845187,
+  998989502,
+  3765401048,
+  2244026483,
+  1075463327,
+  1455516326,
+  1322494562,
+  910128902,
+  469688178,
+  1117454909,
+  936433444,
+  3490320968,
+  3675253459,
+  1240580251,
+  122909385,
+  2157517691,
+  634681816,
+  4142456567,
+  3825094682,
+  3061402683,
+  2540495037,
+  79693498,
+  3249098678,
+  1084186820,
+  1583128258,
+  426386531,
+  1761308591,
+  1047286709,
+  322548459,
+  995290223,
+  1845252383,
+  2603652396,
+  3431023940,
+  2942221577,
+  3202600964,
+  3727903485,
+  1712269319,
+  422464435,
+  3234572375,
+  1170764815,
+  3523960633,
+  3117677531,
+  1434042557,
+  442511882,
+  3600875718,
+  1076654713,
+  1738483198,
+  4213154764,
+  2393238008,
+  3677496056,
+  1014306527,
+  4251020053,
+  793779912,
+  2902807211,
+  842905082,
+  4246964064,
+  1395751752,
+  1040244610,
+  2656851899,
+  3396308128,
+  445077038,
+  3742853595,
+  3577915638,
+  679411651,
+  2892444358,
+  2354009459,
+  1767581616,
+  3150600392,
+  3791627101,
+  3102740896,
+  284835224,
+  4246832056,
+  1258075500,
+  768725851,
+  2589189241,
+  3069724005,
+  3532540348,
+  1274779536,
+  3789419226,
+  2764799539,
+  1660621633,
+  3471099624,
+  4011903706,
+  913787905,
+  3497959166,
+  737222580,
+  2514213453,
+  2928710040,
+  3937242737,
+  1804850592,
+  3499020752,
+  2949064160,
+  2386320175,
+  2390070455,
+  2415321851,
+  4061277028,
+  2290661394,
+  2416832540,
+  1336762016,
+  1754252060,
+  3520065937,
+  3014181293,
+  791618072,
+  3188594551,
+  3933548030,
+  2332172193,
+  3852520463,
+  3043980520,
+  413987798,
+  3465142937,
+  3030929376,
+  4245938359,
+  2093235073,
+  3534596313,
+  375366246,
+  2157278981,
+  2479649556,
+  555357303,
+  3870105701,
+  2008414854,
+  3344188149,
+  4221384143,
+  3956125452,
+  2067696032,
+  3594591187,
+  2921233993,
+  2428461,
+  544322398,
+  577241275,
+  1471733935,
+  610547355,
+  4027169054,
+  1432588573,
+  1507829418,
+  2025931657,
+  3646575487,
+  545086370,
+  48609733,
+  2200306550,
+  1653985193,
+  298326376,
+  1316178497,
+  3007786442,
+  2064951626,
+  458293330,
+  2589141269,
+  3591329599,
+  3164325604,
+  727753846,
+  2179363840,
+  146436021,
+  1461446943,
+  4069977195,
+  705550613,
+  3059967265,
+  3887724982,
+  4281599278,
+  3313849956,
+  1404054877,
+  2845806497,
+  146425753,
+  1854211946,
+  1266315497,
+  3048417604,
+  3681880366,
+  3289982499,
+  290971e4,
+  1235738493,
+  2632868024,
+  2414719590,
+  3970600049,
+  1771706367,
+  1449415276,
+  3266420449,
+  422970021,
+  1963543593,
+  2690192192,
+  3826793022,
+  1062508698,
+  1531092325,
+  1804592342,
+  2583117782,
+  2714934279,
+  4024971509,
+  1294809318,
+  4028980673,
+  1289560198,
+  2221992742,
+  1669523910,
+  35572830,
+  157838143,
+  1052438473,
+  1016535060,
+  1802137761,
+  1753167236,
+  1386275462,
+  3080475397,
+  2857371447,
+  1040679964,
+  2145300060,
+  2390574316,
+  1461121720,
+  2956646967,
+  4031777805,
+  4028374788,
+  33600511,
+  2920084762,
+  1018524850,
+  629373528,
+  3691585981,
+  3515945977,
+  2091462646,
+  2486323059,
+  586499841,
+  988145025,
+  935516892,
+  3367335476,
+  2599673255,
+  2839830854,
+  265290510,
+  3972581182,
+  2759138881,
+  3795373465,
+  1005194799,
+  847297441,
+  406762289,
+  1314163512,
+  1332590856,
+  1866599683,
+  4127851711,
+  750260880,
+  613907577,
+  1450815602,
+  3165620655,
+  3734664991,
+  3650291728,
+  3012275730,
+  3704569646,
+  1427272223,
+  778793252,
+  1343938022,
+  2676280711,
+  2052605720,
+  1946737175,
+  3164576444,
+  3914038668,
+  3967478842,
+  3682934266,
+  1661551462,
+  3294938066,
+  4011595847,
+  840292616,
+  3712170807,
+  616741398,
+  312560963,
+  711312465,
+  1351876610,
+  322626781,
+  1910503582,
+  271666773,
+  2175563734,
+  1594956187,
+  70604529,
+  3617834859,
+  1007753275,
+  1495573769,
+  4069517037,
+  2549218298,
+  2663038764,
+  504708206,
+  2263041392,
+  3941167025,
+  2249088522,
+  1514023603,
+  1998579484,
+  1312622330,
+  694541497,
+  2582060303,
+  2151582166,
+  1382467621,
+  776784248,
+  2618340202,
+  3323268794,
+  2497899128,
+  2784771155,
+  503983604,
+  4076293799,
+  907881277,
+  423175695,
+  432175456,
+  1378068232,
+  4145222326,
+  3954048622,
+  3938656102,
+  3820766613,
+  2793130115,
+  2977904593,
+  26017576,
+  3274890735,
+  3194772133,
+  1700274565,
+  1756076034,
+  4006520079,
+  3677328699,
+  720338349,
+  1533947780,
+  354530856,
+  688349552,
+  3973924725,
+  1637815568,
+  332179504,
+  3949051286,
+  53804574,
+  2852348879,
+  3044236432,
+  1282449977,
+  3583942155,
+  3416972820,
+  4006381244,
+  1617046695,
+  2628476075,
+  3002303598,
+  1686838959,
+  431878346,
+  2686675385,
+  1700445008,
+  1080580658,
+  1009431731,
+  832498133,
+  3223435511,
+  2605976345,
+  2271191193,
+  2516031870,
+  1648197032,
+  4164389018,
+  2548247927,
+  300782431,
+  375919233,
+  238389289,
+  3353747414,
+  2531188641,
+  2019080857,
+  1475708069,
+  455242339,
+  2609103871,
+  448939670,
+  3451063019,
+  1395535956,
+  2413381860,
+  1841049896,
+  1491858159,
+  885456874,
+  4264095073,
+  4001119347,
+  1565136089,
+  3898914787,
+  1108368660,
+  540939232,
+  1173283510,
+  2745871338,
+  3681308437,
+  4207628240,
+  3343053890,
+  4016749493,
+  1699691293,
+  1103962373,
+  3625875870,
+  2256883143,
+  3830138730,
+  1031889488,
+  3479347698,
+  1535977030,
+  4236805024,
+  3251091107,
+  2132092099,
+  1774941330,
+  1199868427,
+  1452454533,
+  157007616,
+  2904115357,
+  342012276,
+  595725824,
+  1480756522,
+  206960106,
+  497939518,
+  591360097,
+  863170706,
+  2375253569,
+  3596610801,
+  1814182875,
+  2094937945,
+  3421402208,
+  1082520231,
+  3463918190,
+  2785509508,
+  435703966,
+  3908032597,
+  1641649973,
+  2842273706,
+  3305899714,
+  1510255612,
+  2148256476,
+  2655287854,
+  3276092548,
+  4258621189,
+  236887753,
+  3681803219,
+  274041037,
+  1734335097,
+  3815195456,
+  3317970021,
+  1899903192,
+  1026095262,
+  4050517792,
+  356393447,
+  2410691914,
+  3873677099,
+  3682840055,
+  3913112168,
+  2491498743,
+  4132185628,
+  2489919796,
+  1091903735,
+  1979897079,
+  3170134830,
+  3567386728,
+  3557303409,
+  857797738,
+  1136121015,
+  1342202287,
+  507115054,
+  2535736646,
+  337727348,
+  3213592640,
+  1301675037,
+  2528481711,
+  1895095763,
+  1721773893,
+  3216771564,
+  62756741,
+  2142006736,
+  835421444,
+  2531993523,
+  1442658625,
+  3659876326,
+  2882144922,
+  676362277,
+  1392781812,
+  170690266,
+  3921047035,
+  1759253602,
+  3611846912,
+  1745797284,
+  664899054,
+  1329594018,
+  3901205900,
+  3045908486,
+  2062866102,
+  2865634940,
+  3543621612,
+  3464012697,
+  1080764994,
+  553557557,
+  3656615353,
+  3996768171,
+  991055499,
+  499776247,
+  1265440854,
+  648242737,
+  3940784050,
+  980351604,
+  3713745714,
+  1749149687,
+  3396870395,
+  4211799374,
+  3640570775,
+  1161844396,
+  3125318951,
+  1431517754,
+  545492359,
+  4268468663,
+  3499529547,
+  1437099964,
+  2702547544,
+  3433638243,
+  2581715763,
+  2787789398,
+  1060185593,
+  1593081372,
+  2418618748,
+  4260947970,
+  69676912,
+  2159744348,
+  86519011,
+  2512459080,
+  3838209314,
+  1220612927,
+  3339683548,
+  133810670,
+  1090789135,
+  1078426020,
+  1569222167,
+  845107691,
+  3583754449,
+  4072456591,
+  1091646820,
+  628848692,
+  1613405280,
+  3757631651,
+  526609435,
+  236106946,
+  48312990,
+  2942717905,
+  3402727701,
+  1797494240,
+  859738849,
+  992217954,
+  4005476642,
+  2243076622,
+  3870952857,
+  3732016268,
+  765654824,
+  3490871365,
+  2511836413,
+  1685915746,
+  3888969200,
+  1414112111,
+  2273134842,
+  3281911079,
+  4080962846,
+  172450625,
+  2569994100,
+  980381355,
+  4109958455,
+  2819808352,
+  2716589560,
+  2568741196,
+  3681446669,
+  3329971472,
+  1835478071,
+  660984891,
+  3704678404,
+  4045999559,
+  3422617507,
+  3040415634,
+  1762651403,
+  1719377915,
+  3470491036,
+  2693910283,
+  3642056355,
+  3138596744,
+  1364962596,
+  2073328063,
+  1983633131,
+  926494387,
+  3423689081,
+  2150032023,
+  4096667949,
+  1749200295,
+  3328846651,
+  309677260,
+  2016342300,
+  1779581495,
+  3079819751,
+  111262694,
+  1274766160,
+  443224088,
+  298511866,
+  1025883608,
+  3806446537,
+  1145181785,
+  168956806,
+  3641502830,
+  3584813610,
+  1689216846,
+  3666258015,
+  3200248200,
+  1692713982,
+  2646376535,
+  4042768518,
+  1618508792,
+  1610833997,
+  3523052358,
+  4130873264,
+  2001055236,
+  3610705100,
+  2202168115,
+  4028541809,
+  2961195399,
+  1006657119,
+  2006996926,
+  3186142756,
+  1430667929,
+  3210227297,
+  1314452623,
+  4074634658,
+  4101304120,
+  2273951170,
+  1399257539,
+  3367210612,
+  3027628629,
+  1190975929,
+  2062231137,
+  2333990788,
+  2221543033,
+  2438960610,
+  1181637006,
+  548689776,
+  2362791313,
+  3372408396,
+  3104550113,
+  3145860560,
+  296247880,
+  1970579870,
+  3078560182,
+  3769228297,
+  1714227617,
+  3291629107,
+  3898220290,
+  166772364,
+  1251581989,
+  493813264,
+  448347421,
+  195405023,
+  2709975567,
+  677966185,
+  3703036547,
+  1463355134,
+  2715995803,
+  1338867538,
+  1343315457,
+  2802222074,
+  2684532164,
+  233230375,
+  2599980071,
+  2000651841,
+  3277868038,
+  1638401717,
+  4028070440,
+  3237316320,
+  6314154,
+  819756386,
+  300326615,
+  590932579,
+  1405279636,
+  3267499572,
+  3150704214,
+  2428286686,
+  3959192993,
+  3461946742,
+  1862657033,
+  1266418056,
+  963775037,
+  2089974820,
+  2263052895,
+  1917689273,
+  448879540,
+  3550394620,
+  3981727096,
+  150775221,
+  3627908307,
+  1303187396,
+  508620638,
+  2975983352,
+  2726630617,
+  1817252668,
+  1876281319,
+  1457606340,
+  908771278,
+  3720792119,
+  3617206836,
+  2455994898,
+  1729034894,
+  1080033504,
+  976866871,
+  3556439503,
+  2881648439,
+  1522871579,
+  1555064734,
+  1336096578,
+  3548522304,
+  2579274686,
+  3574697629,
+  3205460757,
+  3593280638,
+  3338716283,
+  3079412587,
+  564236357,
+  2993598910,
+  1781952180,
+  1464380207,
+  3163844217,
+  3332601554,
+  1699332808,
+  1393555694,
+  1183702653,
+  3581086237,
+  1288719814,
+  691649499,
+  2847557200,
+  2895455976,
+  3193889540,
+  2717570544,
+  1781354906,
+  1676643554,
+  2592534050,
+  3230253752,
+  1126444790,
+  2770207658,
+  2633158820,
+  2210423226,
+  2615765581,
+  2414155088,
+  3127139286,
+  673620729,
+  2805611233,
+  1269405062,
+  4015350505,
+  3341807571,
+  4149409754,
+  1057255273,
+  2012875353,
+  2162469141,
+  2276492801,
+  2601117357,
+  993977747,
+  3918593370,
+  2654263191,
+  753973209,
+  36408145,
+  2530585658,
+  25011837,
+  3520020182,
+  2088578344,
+  530523599,
+  2918365339,
+  1524020338,
+  1518925132,
+  3760827505,
+  3759777254,
+  1202760957,
+  3985898139,
+  3906192525,
+  674977740,
+  4174734889,
+  2031300136,
+  2019492241,
+  3983892565,
+  4153806404,
+  3822280332,
+  352677332,
+  2297720250,
+  60907813,
+  90501309,
+  3286998549,
+  1016092578,
+  2535922412,
+  2839152426,
+  457141659,
+  509813237,
+  4120667899,
+  652014361,
+  1966332200,
+  2975202805,
+  55981186,
+  2327461051,
+  676427537,
+  3255491064,
+  2882294119,
+  3433927263,
+  1307055953,
+  942726286,
+  933058658,
+  2468411793,
+  3933900994,
+  4215176142,
+  1361170020,
+  2001714738,
+  2830558078,
+  3274259782,
+  1222529897,
+  1679025792,
+  2729314320,
+  3714953764,
+  1770335741,
+  151462246,
+  3013232138,
+  1682292957,
+  1483529935,
+  471910574,
+  1539241949,
+  458788160,
+  3436315007,
+  1807016891,
+  3718408830,
+  978976581,
+  1043663428,
+  3165965781,
+  1927990952,
+  4200891579,
+  2372276910,
+  3208408903,
+  3533431907,
+  1412390302,
+  2931980059,
+  4132332400,
+  1947078029,
+  3881505623,
+  4168226417,
+  2941484381,
+  1077988104,
+  1320477388,
+  886195818,
+  18198404,
+  3786409e3,
+  2509781533,
+  112762804,
+  3463356488,
+  1866414978,
+  891333506,
+  18488651,
+  661792760,
+  1628790961,
+  3885187036,
+  3141171499,
+  876946877,
+  2693282273,
+  1372485963,
+  791857591,
+  2686433993,
+  3759982718,
+  3167212022,
+  3472953795,
+  2716379847,
+  445679433,
+  3561995674,
+  3504004811,
+  3574258232,
+  54117162,
+  3331405415,
+  2381918588,
+  3769707343,
+  4154350007,
+  1140177722,
+  4074052095,
+  668550556,
+  3214352940,
+  367459370,
+  261225585,
+  2610173221,
+  4209349473,
+  3468074219,
+  3265815641,
+  314222801,
+  3066103646,
+  3808782860,
+  282218597,
+  3406013506,
+  3773591054,
+  379116347,
+  1285071038,
+  846784868,
+  2669647154,
+  3771962079,
+  3550491691,
+  2305946142,
+  453669953,
+  1268987020,
+  3317592352,
+  3279303384,
+  3744833421,
+  2610507566,
+  3859509063,
+  266596637,
+  3847019092,
+  517658769,
+  3462560207,
+  3443424879,
+  370717030,
+  4247526661,
+  2224018117,
+  4143653529,
+  4112773975,
+  2788324899,
+  2477274417,
+  1456262402,
+  2901442914,
+  1517677493,
+  1846949527,
+  2295493580,
+  3734397586,
+  2176403920,
+  1280348187,
+  1908823572,
+  3871786941,
+  846861322,
+  1172426758,
+  3287448474,
+  3383383037,
+  1655181056,
+  3139813346,
+  901632758,
+  1897031941,
+  2986607138,
+  3066810236,
+  3447102507,
+  1393639104,
+  373351379,
+  950779232,
+  625454576,
+  3124240540,
+  4148612726,
+  2007998917,
+  544563296,
+  2244738638,
+  2330496472,
+  2058025392,
+  1291430526,
+  424198748,
+  50039436,
+  29584100,
+  3605783033,
+  2429876329,
+  2791104160,
+  1057563949,
+  3255363231,
+  3075367218,
+  3463963227,
+  1469046755,
+  985887462
+];
+var C_ORIG = [
+  1332899944,
+  1700884034,
+  1701343084,
+  1684370003,
+  1668446532,
+  1869963892
+];
+function _encipher(lr, off, P, S) {
+  var n, l = lr[off], r = lr[off + 1];
+  l ^= P[0];
+  n = S[l >>> 24];
+  n += S[256 | l >> 16 & 255];
+  n ^= S[512 | l >> 8 & 255];
+  n += S[768 | l & 255];
+  r ^= n ^ P[1];
+  n = S[r >>> 24];
+  n += S[256 | r >> 16 & 255];
+  n ^= S[512 | r >> 8 & 255];
+  n += S[768 | r & 255];
+  l ^= n ^ P[2];
+  n = S[l >>> 24];
+  n += S[256 | l >> 16 & 255];
+  n ^= S[512 | l >> 8 & 255];
+  n += S[768 | l & 255];
+  r ^= n ^ P[3];
+  n = S[r >>> 24];
+  n += S[256 | r >> 16 & 255];
+  n ^= S[512 | r >> 8 & 255];
+  n += S[768 | r & 255];
+  l ^= n ^ P[4];
+  n = S[l >>> 24];
+  n += S[256 | l >> 16 & 255];
+  n ^= S[512 | l >> 8 & 255];
+  n += S[768 | l & 255];
+  r ^= n ^ P[5];
+  n = S[r >>> 24];
+  n += S[256 | r >> 16 & 255];
+  n ^= S[512 | r >> 8 & 255];
+  n += S[768 | r & 255];
+  l ^= n ^ P[6];
+  n = S[l >>> 24];
+  n += S[256 | l >> 16 & 255];
+  n ^= S[512 | l >> 8 & 255];
+  n += S[768 | l & 255];
+  r ^= n ^ P[7];
+  n = S[r >>> 24];
+  n += S[256 | r >> 16 & 255];
+  n ^= S[512 | r >> 8 & 255];
+  n += S[768 | r & 255];
+  l ^= n ^ P[8];
+  n = S[l >>> 24];
+  n += S[256 | l >> 16 & 255];
+  n ^= S[512 | l >> 8 & 255];
+  n += S[768 | l & 255];
+  r ^= n ^ P[9];
+  n = S[r >>> 24];
+  n += S[256 | r >> 16 & 255];
+  n ^= S[512 | r >> 8 & 255];
+  n += S[768 | r & 255];
+  l ^= n ^ P[10];
+  n = S[l >>> 24];
+  n += S[256 | l >> 16 & 255];
+  n ^= S[512 | l >> 8 & 255];
+  n += S[768 | l & 255];
+  r ^= n ^ P[11];
+  n = S[r >>> 24];
+  n += S[256 | r >> 16 & 255];
+  n ^= S[512 | r >> 8 & 255];
+  n += S[768 | r & 255];
+  l ^= n ^ P[12];
+  n = S[l >>> 24];
+  n += S[256 | l >> 16 & 255];
+  n ^= S[512 | l >> 8 & 255];
+  n += S[768 | l & 255];
+  r ^= n ^ P[13];
+  n = S[r >>> 24];
+  n += S[256 | r >> 16 & 255];
+  n ^= S[512 | r >> 8 & 255];
+  n += S[768 | r & 255];
+  l ^= n ^ P[14];
+  n = S[l >>> 24];
+  n += S[256 | l >> 16 & 255];
+  n ^= S[512 | l >> 8 & 255];
+  n += S[768 | l & 255];
+  r ^= n ^ P[15];
+  n = S[r >>> 24];
+  n += S[256 | r >> 16 & 255];
+  n ^= S[512 | r >> 8 & 255];
+  n += S[768 | r & 255];
+  l ^= n ^ P[16];
+  lr[off] = r ^ P[BLOWFISH_NUM_ROUNDS + 1];
+  lr[off + 1] = l;
+  return lr;
+}
+function _streamtoword(data, offp) {
+  for (var i = 0, word = 0; i < 4; ++i)
+    word = word << 8 | data[offp] & 255, offp = (offp + 1) % data.length;
+  return { key: word, offp };
+}
+function _key(key, P, S) {
+  var offset = 0, lr = [0, 0], plen = P.length, slen = S.length, sw;
+  for (var i = 0; i < plen; i++)
+    sw = _streamtoword(key, offset), offset = sw.offp, P[i] = P[i] ^ sw.key;
+  for (i = 0; i < plen; i += 2)
+    lr = _encipher(lr, 0, P, S), P[i] = lr[0], P[i + 1] = lr[1];
+  for (i = 0; i < slen; i += 2)
+    lr = _encipher(lr, 0, P, S), S[i] = lr[0], S[i + 1] = lr[1];
+}
+function _ekskey(data, key, P, S) {
+  var offp = 0, lr = [0, 0], plen = P.length, slen = S.length, sw;
+  for (var i = 0; i < plen; i++)
+    sw = _streamtoword(key, offp), offp = sw.offp, P[i] = P[i] ^ sw.key;
+  offp = 0;
+  for (i = 0; i < plen; i += 2)
+    sw = _streamtoword(data, offp), offp = sw.offp, lr[0] ^= sw.key, sw = _streamtoword(data, offp), offp = sw.offp, lr[1] ^= sw.key, lr = _encipher(lr, 0, P, S), P[i] = lr[0], P[i + 1] = lr[1];
+  for (i = 0; i < slen; i += 2)
+    sw = _streamtoword(data, offp), offp = sw.offp, lr[0] ^= sw.key, sw = _streamtoword(data, offp), offp = sw.offp, lr[1] ^= sw.key, lr = _encipher(lr, 0, P, S), S[i] = lr[0], S[i + 1] = lr[1];
+}
+function _crypt(b, salt, rounds, callback, progressCallback) {
+  var cdata = C_ORIG.slice(), clen = cdata.length, err;
+  if (rounds < 4 || rounds > 31) {
+    err = Error("Illegal number of rounds (4-31): " + rounds);
+    if (callback) {
+      nextTick(callback.bind(this, err));
+      return;
+    } else throw err;
+  }
+  if (salt.length !== BCRYPT_SALT_LEN) {
+    err = Error(
+      "Illegal salt length: " + salt.length + " != " + BCRYPT_SALT_LEN
+    );
+    if (callback) {
+      nextTick(callback.bind(this, err));
+      return;
+    } else throw err;
+  }
+  rounds = 1 << rounds >>> 0;
+  var P, S, i = 0, j;
+  if (typeof Int32Array === "function") {
+    P = new Int32Array(P_ORIG);
+    S = new Int32Array(S_ORIG);
+  } else {
+    P = P_ORIG.slice();
+    S = S_ORIG.slice();
+  }
+  _ekskey(salt, b, P, S);
+  function next() {
+    if (progressCallback) progressCallback(i / rounds);
+    if (i < rounds) {
+      var start = Date.now();
+      for (; i < rounds; ) {
+        i = i + 1;
+        _key(b, P, S);
+        _key(salt, P, S);
+        if (Date.now() - start > MAX_EXECUTION_TIME) break;
+      }
+    } else {
+      for (i = 0; i < 64; i++)
+        for (j = 0; j < clen >> 1; j++) _encipher(cdata, j << 1, P, S);
+      var ret = [];
+      for (i = 0; i < clen; i++)
+        ret.push((cdata[i] >> 24 & 255) >>> 0), ret.push((cdata[i] >> 16 & 255) >>> 0), ret.push((cdata[i] >> 8 & 255) >>> 0), ret.push((cdata[i] & 255) >>> 0);
+      if (callback) {
+        callback(null, ret);
+        return;
+      } else return ret;
+    }
+    if (callback) nextTick(next);
+  }
+  if (typeof callback !== "undefined") {
+    next();
+  } else {
+    var res;
+    while (true) if (typeof (res = next()) !== "undefined") return res || [];
+  }
+}
+function _hash(password, salt, callback, progressCallback) {
+  var err;
+  if (typeof password !== "string" || typeof salt !== "string") {
+    err = Error("Invalid string / salt: Not a string");
+    if (callback) {
+      nextTick(callback.bind(this, err));
+      return;
+    } else throw err;
+  }
+  var minor, offset;
+  if (salt.charAt(0) !== "$" || salt.charAt(1) !== "2") {
+    err = Error("Invalid salt version: " + salt.substring(0, 2));
+    if (callback) {
+      nextTick(callback.bind(this, err));
+      return;
+    } else throw err;
+  }
+  if (salt.charAt(2) === "$") minor = String.fromCharCode(0), offset = 3;
+  else {
+    minor = salt.charAt(2);
+    if (minor !== "a" && minor !== "b" && minor !== "y" || salt.charAt(3) !== "$") {
+      err = Error("Invalid salt revision: " + salt.substring(2, 4));
+      if (callback) {
+        nextTick(callback.bind(this, err));
+        return;
+      } else throw err;
+    }
+    offset = 4;
+  }
+  if (salt.charAt(offset + 2) > "$") {
+    err = Error("Missing salt rounds");
+    if (callback) {
+      nextTick(callback.bind(this, err));
+      return;
+    } else throw err;
+  }
+  var r1 = parseInt(salt.substring(offset, offset + 1), 10) * 10, r2 = parseInt(salt.substring(offset + 1, offset + 2), 10), rounds = r1 + r2, real_salt = salt.substring(offset + 3, offset + 25);
+  password += minor >= "a" ? "\0" : "";
+  var passwordb = utf8Array(password), saltb = base64_decode(real_salt, BCRYPT_SALT_LEN);
+  function finish(bytes) {
+    var res = [];
+    res.push("$2");
+    if (minor >= "a") res.push(minor);
+    res.push("$");
+    if (rounds < 10) res.push("0");
+    res.push(rounds.toString());
+    res.push("$");
+    res.push(base64_encode(saltb, saltb.length));
+    res.push(base64_encode(bytes, C_ORIG.length * 4 - 1));
+    return res.join("");
+  }
+  if (typeof callback == "undefined")
+    return finish(_crypt(passwordb, saltb, rounds));
+  else {
+    _crypt(
+      passwordb,
+      saltb,
+      rounds,
+      function(err2, bytes) {
+        if (err2) callback(err2, null);
+        else callback(null, finish(bytes));
+      },
+      progressCallback
+    );
+  }
+}
+function encodeBase64(bytes, length) {
+  return base64_encode(bytes, length);
+}
+function decodeBase64(string, length) {
+  return base64_decode(string, length);
+}
+var bcryptjs_default = {
+  setRandomFallback,
+  genSaltSync,
+  genSalt,
+  hashSync,
+  hash,
+  compareSync,
+  compare,
+  getRounds,
+  getSalt,
+  truncates,
+  encodeBase64,
+  decodeBase64
+};
+
 // src/domain/auth/user.repository.ts
-var users = [
+var seedPlain = [
   {
     id: "u-admin",
     email: "admin@example.com",
     name: "Admin User",
     role: "ADMIN",
     warehouseId: "wh1",
+    workerId: void 0,
     password: "admin123"
   },
   {
@@ -28290,6 +30952,7 @@ var users = [
     name: "Ops Manager",
     role: "OPS_MANAGER",
     warehouseId: "wh1",
+    workerId: void 0,
     password: "password123"
   },
   {
@@ -28298,6 +30961,7 @@ var users = [
     name: "Warehouse Manager",
     role: "WAREHOUSE_MANAGER",
     warehouseId: "wh1",
+    workerId: void 0,
     password: "password123"
   },
   {
@@ -28323,6 +30987,8 @@ var users = [
     email: "support@example.com",
     name: "Customer Support",
     role: "SUPPORT",
+    warehouseId: void 0,
+    workerId: void 0,
     password: "password123"
   },
   {
@@ -28330,12 +30996,30 @@ var users = [
     email: "analytics@example.com",
     name: "Analytics",
     role: "ANALYTICS",
+    warehouseId: void 0,
+    workerId: void 0,
     password: "password123"
+  },
+  {
+    id: "u-integration",
+    email: "integration@cozey-os.internal",
+    name: "Channel Integration",
+    role: "INTEGRATION",
+    password: "integration-secret"
   }
 ];
+var users = seedPlain.map((u) => ({
+  id: u.id,
+  email: u.email.toLowerCase(),
+  name: u.name,
+  role: u.role,
+  warehouseId: u.warehouseId,
+  workerId: u.workerId,
+  passwordHash: bcryptjs_default.hashSync(u.password, 10)
+}));
 var UserRepository = class {
   async findByEmail(email) {
-    const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+    const user = users.find((u) => u.email === email.toLowerCase());
     return user || null;
   }
   async findById(id) {
@@ -28356,17 +31040,18 @@ var userRepo = new UserRepository();
 var JWT_SECRET = process.env.JWT_SECRET || "dev-mini-cos-secret";
 var JWT_EXPIRES_IN = "1h";
 function toPublicUser(user) {
-  const { password, ...rest } = user;
+  const { passwordHash, ...rest } = user;
   return rest;
 }
 var AuthService = class {
   async login(email, password) {
     const user = await userRepo.findByEmail(email);
     if (!user) {
-      throw new Error("Invalid email or password");
+      throw new Error("Invalid credentials");
     }
-    if (user.password !== password) {
-      throw new Error("Invalid email or password");
+    const ok = await bcryptjs_default.compare(password, user.passwordHash);
+    if (!ok) {
+      throw new Error("Invalid credentials");
     }
     const claims = {
       sub: user.id,
@@ -28390,6 +31075,10 @@ var AuthService = class {
 // src/middleware/auth.middleware.ts
 var authService = new AuthService();
 function requireAuth(req, res, next) {
+  console.log("requireAuth executing. NODE_ENV:", process.env.NODE_ENV, "req.user:", req.user);
+  if (process.env.NODE_ENV === "development" && req.user) {
+    return next();
+  }
   const header = req.headers.authorization || "";
   if (!header.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Missing or invalid Authorization header" });
@@ -28404,12 +31093,15 @@ function requireAuth(req, res, next) {
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 }
-function requireRole(...roles) {
+function requireRole(...roles2) {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ error: "Not authenticated" });
     }
-    if (!roles.includes(req.user.role)) {
+    if (req.user.role === "SIMULATOR") {
+      return next();
+    }
+    if (!roles2.includes(req.user.role)) {
       return res.status(403).json({ error: "Forbidden: insufficient role" });
     }
     return next();
@@ -28459,99 +31151,107 @@ var orders_route_default = router;
 // src/api/routes/tasks.route.ts
 var import_express2 = __toESM(require_express3(), 1);
 
-// src/data/tasks.ts
-var tasks = [
-  {
-    id: "T-1",
-    orderId: "O-10021",
-    boxId: "B-1",
-    warehouseId: "wh1",
-    workerId: "w1",
-    status: "PENDING_PICK",
-    createdAt: "2025-11-23T13:00:00Z"
-  },
-  {
-    id: "T-2",
-    orderId: "O-10021",
-    boxId: "B-2",
-    warehouseId: "wh1",
-    workerId: "w2",
-    status: "IN_PROGRESS",
-    createdAt: "2025-11-23T13:30:00Z"
-  },
-  {
-    id: "T-3",
-    orderId: "O-10022",
-    boxId: "B-3",
-    warehouseId: "wh1",
-    workerId: null,
-    status: "PENDING_PICK",
-    createdAt: "2025-11-23T14:00:00Z"
+// src/domain/inventory/inventory.service.ts
+function reserveStock(warehouse, sku, qty) {
+  const available = warehouse.inventory[sku] ?? 0;
+  if (available < qty) {
+    return false;
   }
-];
-
-// src/domain/tasks/task.repository.ts
-var TaskRepository = class {
-  async listTasks() {
-    return tasks;
-  }
-  async listTasksForWorker(workerId) {
-    return tasks.filter((t) => t.workerId === workerId);
-  }
-  async getTask(taskId) {
-    return tasks.find((t) => t.id === taskId) || null;
-  }
-  async saveTask(task) {
-    const idx = tasks.findIndex((t) => t.id === task.id);
-    if (idx === -1) {
-      tasks.push(task);
-    } else {
-      tasks[idx] = task;
-    }
-  }
-  async updateStatus(taskId, newStatus) {
-    const task = await this.getTask(taskId);
-    if (!task) throw new Error("Task not found");
-    task.status = newStatus;
-    await this.saveTask(task);
-    return task;
-  }
-  async assignWorker(taskId, workerId) {
-    const task = await this.getTask(taskId);
-    if (!task) throw new Error("Task not found");
-    task.workerId = workerId;
-    task.status = "IN_PROGRESS";
-    await this.saveTask(task);
-    return task;
-  }
-  seedIfEmpty() {
-    if (tasks.length > 0) return;
-  }
-};
+  warehouse.inventory[sku] = available - qty;
+  return true;
+}
+function consumeReservedStock(box, _warehouse) {
+  box.reservedQty = 0;
+}
 
 // src/domain/tasks/task.service.ts
-var repo2 = new TaskRepository();
 var TaskService = class {
   async listTasks() {
-    return repo2.listTasks();
+    return taskRepo.listTasks();
   }
   async getTasksForWorker(workerId) {
-    return repo2.listTasksForWorker(workerId);
+    return taskRepo.listTasksForWorker(workerId);
   }
   async updateStatus(taskId, status) {
-    return repo2.updateStatus(taskId, status);
+    const task = await taskRepo.getTask(taskId);
+    if (!task) throw new Error("Task not found");
+    const prevStatus = task.status;
+    if (task.type === "PICK" && status === "IN_PROGRESS") {
+      const order = orderRepo.findById(task.orderId);
+      const box = order?.boxes.find((b) => b.id === task.boxId);
+      const wh = warehouseRepo2.findById(task.warehouseId);
+      if (!order || !box || !wh) throw new Error("Order/box/warehouse missing");
+      const qty = box.reservedQty != null ? box.reservedQty : 1;
+      const ok = reserveStock(wh, box.sku, qty);
+      if (!ok) {
+        console.warn(
+          `[INV] BLOCKED: insufficient ${box.sku} in ${wh.id}`
+        );
+        throw new Error(`Insufficient inventory for SKU ${box.sku}`);
+      }
+      box.reservedQty = qty;
+      orderRepo.saveOrder(order);
+      console.log(
+        `[INV] Reserved ${qty} ${box.sku} (remaining: ${wh.inventory[box.sku]})`
+      );
+    }
+    if (task.type === "PACK" && status === "DONE") {
+      const order = orderRepo.findById(task.orderId);
+      const box = order?.boxes.find((b) => b.id === task.boxId);
+      const wh = warehouseRepo2.findById(task.warehouseId);
+      if (order && box && wh) {
+        consumeReservedStock(box, wh);
+        orderRepo.saveOrder(order);
+        console.log(`[INV] Consumed ${box.sku} reserved stock`);
+      }
+    }
+    const updated = await taskRepo.updateStatus(taskId, status);
+    if (prevStatus !== "DONE" && status === "DONE" && updated.workerId) {
+      workerRepo.updateWorkerLoad(updated.workerId, -1);
+    }
+    eventLogger.log(
+      updated.warehouseId,
+      "TASK_UPDATED",
+      `Task ${updated.id} updated to ${status}`,
+      { taskId: updated.id, status }
+    );
+    return updated;
   }
   async assignWorker(taskId, workerId) {
-    return repo2.assignWorker(taskId, workerId);
+    return taskRepo.assignWorker(taskId, workerId);
+  }
+  async completeNextInProgress() {
+    const tasks2 = await taskRepo.listTasks();
+    const next = tasks2.find((t) => t.status === "IN_PROGRESS");
+    if (!next) return null;
+    return taskRepo.updateStatus(next.id, "DONE");
   }
 };
 
 // src/api/controllers/tasks.controller.ts
 var service2 = new TaskService();
-var getTasks = async (_req, res) => {
+var getTasks = async (req, res) => {
   try {
+    const user = req.user;
     const tasks2 = await service2.listTasks();
+    if (user?.role === "WORKER" && user.warehouseId) {
+      const filtered = tasks2.filter((t) => t.warehouseId === user.warehouseId);
+      return res.json(filtered);
+    }
     res.json(tasks2);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+var updateTaskStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
+    if (!status) {
+      return res.status(400).json({ error: "Status is required" });
+    }
+    const updated = await service2.updateStatus(id, status);
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -28584,7 +31284,8 @@ router2.get(
 router2.patch(
   "/:id/status",
   requireAuth,
-  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER")
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"),
+  updateTaskStatus
 );
 router2.delete(
   "/:id",
@@ -28603,112 +31304,25 @@ var tasks_route_default = router2;
 // src/api/routes/customers.route.ts
 var import_express3 = __toESM(require_express3(), 1);
 
-// src/data/customers.ts
-var customers = [
-  {
-    id: "c1",
-    name: "Chanho Kim",
-    email: "chanho@example.com",
-    homeAddress: {
-      line1: "123 St Catherine St",
-      city: "Montreal",
-      postal: "H3B 1K4",
-      lat: 45.5048,
-      lng: -73.5772
-    },
-    deliveryAddress: {
-      line1: "450 Rue Sainte-Catherine Ouest",
-      city: "Montreal",
-      postal: "H3B 1A6",
-      lat: 45.4995,
-      lng: -73.5641
-    }
-  },
-  {
-    id: "c2",
-    name: "Sophia Li",
-    email: "sophia@example.com",
-    homeAddress: {
-      line1: "900 Blvd Ren\xE9-L\xE9vesque Ouest",
-      city: "Montreal",
-      postal: "H3B 4X9",
-      lat: 45.499,
-      lng: -73.567
-    },
-    deliveryAddress: {
-      line1: "990 Sherbrooke St W",
-      city: "Montreal",
-      postal: "H3A 1G5",
-      lat: 45.5042,
-      lng: -73.5741
-    }
-  }
-];
-
 // src/domain/customers/customer.repository.ts
+var customers = [];
 var CustomerRepository = class {
-  async listCustomers() {
+  listCustomers() {
     return customers;
   }
-  async findById(id) {
+  getCustomer(id) {
     return customers.find((c) => c.id === id) || null;
   }
-  async saveCustomer(cust) {
-    const index = customers.findIndex((c) => c.id === cust.id);
-    if (index === -1) customers.push(cust);
-    else customers[index] = cust;
-  }
-  /** Ensures initial seed data exists when running offline */
-  seedIfEmpty() {
-    if (customers.length > 0) return;
-    customers.push(
-      {
-        id: "c1",
-        name: "Chanho Kim",
-        email: "chanho@example.com",
-        homeAddress: {
-          line1: "123 St Catherine St",
-          city: "Montreal",
-          postal: "H3B 1K4",
-          lat: 45.5048,
-          lng: -73.5772
-        },
-        deliveryAddress: {
-          line1: "450 Rue Sainte-Catherine Ouest",
-          city: "Montreal",
-          postal: "H3B 1A6",
-          lat: 45.4995,
-          lng: -73.5641
-        }
-      },
-      {
-        id: "c2",
-        name: "Sophia Li",
-        email: "sophia@example.com",
-        homeAddress: {
-          line1: "900 Blvd Ren\xE9-L\xE9vesque Ouest",
-          city: "Montreal",
-          postal: "H3B 4X9",
-          lat: 45.499,
-          lng: -73.567
-        },
-        deliveryAddress: {
-          line1: "990 Sherbrooke St W",
-          city: "Montreal",
-          postal: "H3A 1G5",
-          lat: 45.5042,
-          lng: -73.5741
-        }
-      }
-    );
+  seedIfEmpty(defaults = []) {
+    if (customers.length === 0) customers = [...defaults];
   }
 };
 
 // src/api/controllers/customers.controller.ts
-var repo3 = new CustomerRepository();
+var repo = new CustomerRepository();
 var getCustomers = async (_req, res) => {
   try {
-    const customers2 = await repo3.listCustomers();
+    const customers2 = await repo.listCustomers();
     res.json(customers2);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -28723,126 +31337,15 @@ var customers_route_default = router3;
 // src/api/routes/workers.route.ts
 var import_express4 = __toESM(require_express3(), 1);
 
-// src/data/workers.ts
-var workers = [
-  {
-    id: "w1",
-    name: "Alex Martin",
-    role: "PICKER",
-    maxTasks: 10,
-    currentTasks: 2,
-    warehouseId: "wh1",
-    homeBase: {
-      line1: "123 Logistics Ave",
-      city: "Montreal",
-      postal: "H4T 1A1",
-      lat: 45.5101,
-      lng: -73.665
-    },
-    activeTaskIds: []
-  },
-  {
-    id: "w2",
-    name: "Maya Thompson",
-    role: "SHIPPER",
-    maxTasks: 5,
-    currentTasks: 1,
-    warehouseId: "wh1",
-    homeBase: {
-      line1: "500 Rue du College",
-      city: "Montreal",
-      postal: "H4T 1V5",
-      lat: 45.5003,
-      lng: -73.6542
-    },
-    activeTaskIds: []
-  },
-  {
-    id: "w3",
-    name: "David Lee",
-    role: "PICKER",
-    maxTasks: 8,
-    currentTasks: 0,
-    warehouseId: "wh1",
-    homeBase: {
-      line1: "800 Logistics Blvd",
-      city: "Montreal",
-      postal: "H4T 2B3",
-      lat: 45.5142,
-      lng: -73.6601
-    },
-    activeTaskIds: []
-  }
-];
-
-// src/domain/workers/worker.repository.ts
-var WorkerRepository = class {
-  async listWorkers() {
-    return workers;
-  }
-  async findById(id) {
-    return workers.find((w) => w.id === id) || null;
-  }
-  async saveWorker(worker) {
-    const idx = workers.findIndex((w) => w.id === worker.id);
-    if (idx === -1) workers.push(worker);
-    else workers[idx] = worker;
-  }
-  /** Ensure seed only happens if array is empty */
-  seedIfEmpty() {
-    if (workers.length > 0) return;
-    workers.push(
-      {
-        id: "w1",
-        name: "Alex Martin",
-        role: "Warehouse Picker",
-        maxTasks: 10,
-        currentTasks: 2,
-        homeBase: {
-          line1: "123 Logistics Ave",
-          city: "Montreal",
-          postal: "H4T 1A1",
-          lat: 45.5101,
-          lng: -73.665
-        }
-      },
-      {
-        id: "w2",
-        name: "Maya Thompson",
-        role: "Delivery Specialist",
-        maxTasks: 5,
-        currentTasks: 1,
-        homeBase: {
-          line1: "500 Rue du College",
-          city: "Montreal",
-          postal: "H4T 1V5",
-          lat: 45.5003,
-          lng: -73.6542
-        }
-      },
-      {
-        id: "w3",
-        name: "David Lee",
-        role: "Warehouse Picker",
-        maxTasks: 8,
-        currentTasks: 0,
-        homeBase: {
-          line1: "800 Logistics Blvd",
-          city: "Montreal",
-          postal: "H4T 2B3",
-          lat: 45.5142,
-          lng: -73.6601
-        }
-      }
-    );
-  }
-};
-
 // src/api/controllers/workers.controller.ts
-var repo4 = new WorkerRepository();
 var getWorkers = async (_req, res) => {
   try {
-    const workers2 = await repo4.listWorkers();
+    const workers2 = workerRepo.listWorkers().map((w) => ({
+      ...w,
+      load: w.currentLoad ?? 0,
+      capacity: w.capacity ?? w.maxTasks ?? 0,
+      utilization: (w.capacity ?? w.maxTasks ?? 0) === 0 ? 0 : (w.currentLoad ?? 0) / (w.capacity ?? w.maxTasks ?? 0)
+    }));
     res.json(workers2);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -28857,68 +31360,289 @@ var workers_route_default = router4;
 // src/api/routes/warehouses.route.ts
 var import_express5 = __toESM(require_express3(), 1);
 
-// src/data/warehouses.ts
-var warehouses = [
-  {
-    id: "wh1",
-    name: "Montreal Main Warehouse",
-    location: {
-      line1: "600 Logistics Dr",
-      city: "Montreal",
-      postal: "H4T 1J4",
-      lat: 45.5088,
-      lng: -73.653
-    },
-    inventory: {
-      "QWRERTDS": 120,
-      "ASDFDGQ": 80,
-      "ASDF": 300,
-      "COZEY001": 55
-    }
-  }
-];
-
-// src/domain/warehouses/warehouse.repository.ts
-var WarehouseRepository = class {
-  async listWarehouses() {
-    return warehouses;
-  }
-  async findById(id) {
-    return warehouses.find((w) => w.id === id) || null;
-  }
-  async saveWarehouse(wh) {
-    const idx = warehouses.findIndex((w) => w.id === wh.id);
-    if (idx === -1) warehouses.push(wh);
-    else warehouses[idx] = wh;
-  }
-  seedIfEmpty() {
-    if (warehouses.length > 0) return;
-    warehouses.push({
-      id: "wh1",
-      name: "Montreal Main Warehouse",
-      location: {
-        line1: "600 Logistics Dr",
-        city: "Montreal",
-        postal: "H4T 1J4",
-        lat: 45.5088,
-        lng: -73.653
-      },
-      inventory: {
-        "QWRERTDS": 120,
-        "ASDFDGQ": 80,
-        "ASDF": 300,
-        "COZEY001": 55
+// src/domain/metrics/metrics.service.ts
+var MetricsService = class {
+  // Computes metrics over a sliding window; today = last 24h.
+  async getWarehouseMetrics(warehouseId, now = /* @__PURE__ */ new Date()) {
+    const to = now.getTime();
+    const from = to - 24 * 60 * 60 * 1e3;
+    const sevenDaysAgo = to - 7 * 24 * 60 * 60 * 1e3;
+    const tasks2 = await taskRepo.listTasks();
+    const orders2 = orderRepo.listOrders();
+    const tasksForWh = tasks2.filter((t) => t.warehouseId === warehouseId);
+    const tasks24h = tasksForWh.filter((t) => new Date(t.createdAt).getTime() >= from && t.status === "DONE");
+    const tasksCompletedToday = tasks24h.length;
+    const ordersProcessedToday = orders2.filter(
+      (o) => new Date(o.createdAt).getTime() >= from && (o.routes?.[warehouseId]?.length || o.boxes.some((b) => b.warehouseId === warehouseId))
+    ).length;
+    const avgDuration = (type) => {
+      const filtered = tasks24h.filter((t) => t.type === type);
+      if (filtered.length === 0) return null;
+      return null;
+    };
+    let cycleSum = 0;
+    let cycleCount = 0;
+    for (const order of orders2) {
+      const shipTasks = tasksForWh.filter((t) => t.orderId === order.id && t.type === "SHIP" && t.status === "DONE");
+      if (shipTasks.length === 0) continue;
+      const lastShip = Math.max(...shipTasks.map((t) => new Date(t.createdAt).getTime()));
+      const createdAt = new Date(order.createdAt).getTime();
+      if (lastShip >= from) {
+        cycleSum += (lastShip - createdAt) / 1e3;
+        cycleCount += 1;
       }
-    });
+    }
+    const avgOrderCycleTimeSeconds = cycleCount === 0 ? null : cycleSum / cycleCount;
+    const recentOrders = orders2.filter(
+      (o) => new Date(o.createdAt).getTime() >= sevenDaysAgo && (o.routes?.[warehouseId]?.length || o.boxes.some((b) => b.warehouseId === warehouseId))
+    );
+    let slaTotal = 0;
+    let slaOnTime = 0;
+    let distanceSum = 0;
+    let distanceCount = 0;
+    const wh = warehouseRepo2.findById(warehouseId);
+    for (const order of recentOrders) {
+      const shipTasks = tasksForWh.filter((t) => t.orderId === order.id && t.type === "SHIP" && t.status === "DONE");
+      if (shipTasks.length === 0) continue;
+      slaTotal += 1;
+      const lastShip = Math.max(...shipTasks.map((t) => new Date(t.createdAt).getTime()));
+      const createdAt = new Date(order.createdAt).getTime();
+      if (lastShip - createdAt <= 48 * 60 * 60 * 1e3) {
+        slaOnTime += 1;
+      }
+      if (order.destination && wh) {
+        distanceSum += haversineDistanceKm(
+          order.destination.lat,
+          order.destination.lng,
+          wh.location.lat,
+          wh.location.lng
+        );
+        distanceCount += 1;
+      }
+    }
+    return {
+      warehouseId,
+      timeRange: { from: new Date(from).toISOString(), to: new Date(to).toISOString() },
+      ordersProcessedToday,
+      tasksCompletedToday,
+      avgPickTimeSeconds: avgDuration("PICK"),
+      avgPackTimeSeconds: avgDuration("PACK"),
+      avgShipTimeSeconds: avgDuration("SHIP"),
+      avgOrderCycleTimeSeconds,
+      sla: {
+        onTimeShipRate7d: slaTotal === 0 ? null : slaOnTime / slaTotal,
+        avgDeliveryDistanceKm7d: distanceCount === 0 ? null : distanceSum / distanceCount
+      }
+    };
+  }
+  async getSlaMetrics() {
+    const orders2 = orderRepo.listOrders();
+    const tasks2 = await taskRepo.listTasks();
+    const toMinutes = (ms) => ms / (60 * 1e3);
+    const pickDiffs = [];
+    const packDiffs = [];
+    const shipDiffs = [];
+    for (const o of orders2) {
+      const created = new Date(o.createdAt).getTime();
+      const pick = tasks2.filter((t) => t.orderId === o.id && t.type === "PICK").sort((a, b) => a.createdAt && b.createdAt ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() : 0)[0];
+      const pack = tasks2.filter((t) => t.orderId === o.id && t.type === "PACK").sort((a, b) => a.createdAt && b.createdAt ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() : 0)[0];
+      const ship = tasks2.filter((t) => t.orderId === o.id && t.type === "SHIP").sort((a, b) => a.createdAt && b.createdAt ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() : 0)[0];
+      if (pick?.createdAt) pickDiffs.push(toMinutes(new Date(pick.createdAt).getTime() - created));
+      if (pack?.createdAt) packDiffs.push(toMinutes(new Date(pack.createdAt).getTime() - created));
+      if (ship?.createdAt) shipDiffs.push(toMinutes(new Date(ship.createdAt).getTime() - created));
+    }
+    const avg = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+    const p90 = (arr) => {
+      if (!arr.length) return null;
+      const sorted = [...arr].sort((a, b) => a - b);
+      const idx = Math.floor(0.9 * (sorted.length - 1));
+      return sorted[idx];
+    };
+    const onTimeShipRate = (() => {
+      const targetMinutes = 1440;
+      const eligible = shipDiffs.filter((x) => x != null);
+      if (!eligible.length) return null;
+      const onTime = eligible.filter((x) => x <= targetMinutes).length;
+      return onTime / eligible.length;
+    })();
+    return {
+      avgTimeToPickMinutes: avg(pickDiffs),
+      avgTimeToPackMinutes: avg(packDiffs),
+      avgTimeToShipMinutes: avg(shipDiffs),
+      onTimeShipRate,
+      p90TimeToShipMinutes: p90(shipDiffs)
+    };
+  }
+  async getReturnMetrics() {
+    const orders2 = orderRepo.listOrders();
+    const tasks2 = await taskRepo.listTasks();
+    const shippedBoxesPerOrder = {};
+    for (const t of tasks2) {
+      if (t.type === "SHIP" && t.status === "DONE") {
+        shippedBoxesPerOrder[t.orderId] = (shippedBoxesPerOrder[t.orderId] ?? 0) + 1;
+      }
+    }
+    let totalShipped = 0;
+    let totalReturned = 0;
+    const bySkuMap = {};
+    const byWhMap = {};
+    for (const o of orders2) {
+      const shippedForOrder = shippedBoxesPerOrder[o.id] ?? 0;
+      totalShipped += shippedForOrder;
+      for (const b of o.boxes) {
+        if (["RETURN_RECEIVED", "QA_PENDING", "QA_IN_PROGRESS", "QA_DONE", "RETURN_CLASSIFIED"].includes(b.state)) {
+          totalReturned += 1;
+          bySkuMap[b.sku] = bySkuMap[b.sku] || { shipped: 0, returned: 0 };
+          bySkuMap[b.sku].returned += 1;
+          const wh = b.warehouseId ?? "UNKNOWN";
+          byWhMap[wh] = byWhMap[wh] || { shipped: 0, returned: 0 };
+          byWhMap[wh].returned += 1;
+        }
+        bySkuMap[b.sku] = bySkuMap[b.sku] || { shipped: 0, returned: 0 };
+        if (b.state === "DELIVERED" || b.state === "OUTBOUND" || b.state === "SHIPPED") {
+          bySkuMap[b.sku].shipped += 1;
+          const wh = b.warehouseId ?? "UNKNOWN";
+          byWhMap[wh] = byWhMap[wh] || { shipped: 0, returned: 0 };
+          byWhMap[wh].shipped += 1;
+        }
+      }
+    }
+    const bySku = Object.entries(bySkuMap).map(([sku, data]) => ({
+      sku,
+      shippedBoxes: data.shipped,
+      returnedBoxes: data.returned,
+      rate: data.shipped === 0 ? 0 : data.returned / data.shipped
+    }));
+    const byWarehouse = Object.entries(byWhMap).map(([warehouseId, data]) => ({
+      warehouseId,
+      shippedBoxes: data.shipped,
+      returnedBoxes: data.returned,
+      rate: data.shipped === 0 ? 0 : data.returned / data.shipped
+    }));
+    return {
+      globalReturnRate: totalShipped === 0 ? null : totalReturned / totalShipped,
+      bySku,
+      byWarehouse
+    };
   }
 };
 
 // src/api/controllers/warehouses.controller.ts
-var repo5 = new WarehouseRepository();
 var getWarehouses = async (_req, res) => {
   try {
-    const warehouses2 = await repo5.listWarehouses();
+    const warehouses2 = warehouseRepo2.listWarehouses().map((w) => ({
+      id: w.id,
+      name: w.name,
+      location: {
+        street: w.location?.street ?? w.location?.line1,
+        city: w.location.city,
+        province: w.location?.province,
+        postal: w.location.postal,
+        lat: w.location.lat,
+        lng: w.location.lng
+      }
+    }));
     res.json(warehouses2);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+function enforceWarehouseAccess(req, warehouseId) {
+  const user = req.user;
+  if (!user) return { ok: false, status: 401, message: "Not authenticated" };
+  if (user.role === "ADMIN" || user.role === "OPS_MANAGER") return { ok: true };
+  if (user.role === "WAREHOUSE_MANAGER" && user.warehouseId === warehouseId) return { ok: true };
+  return { ok: false, status: 403, message: "Forbidden" };
+}
+var getWarehouseInventory = async (req, res) => {
+  const warehouseId = req.params.id;
+  const access = enforceWarehouseAccess(req, warehouseId);
+  if (!access.ok) return res.status(access.status).json({ error: access.message });
+  try {
+    const inventory = await warehouseRepo2.getInventoryForWarehouse(warehouseId);
+    return res.json({ warehouseId, inventory });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+var getWarehouseWorkers = async (req, res) => {
+  const warehouseId = req.params.id;
+  const access = enforceWarehouseAccess(req, warehouseId);
+  if (!access.ok) return res.status(access.status).json({ error: access.message });
+  try {
+    const workers2 = workerRepo.listWorkers().filter((w) => w.warehouseId === warehouseId);
+    const tasks2 = await taskRepo.listTasks();
+    const now = Date.now();
+    const dayAgo = now - 24 * 60 * 60 * 1e3;
+    const activities = workers2.map((w) => {
+      const activeTasks = tasks2.filter(
+        (t) => t.warehouseId === warehouseId && t.workerId === w.id && (t.status === "IN_PROGRESS" || t.status === "PENDING_PICK")
+      ).length;
+      const completedTasksToday = tasks2.filter(
+        (t) => t.warehouseId === warehouseId && t.workerId === w.id && t.status === "DONE" && new Date(t.createdAt).getTime() >= dayAgo
+        // using createdAt as proxy for completion
+      ).length;
+      const capacity = w.capacity ?? w.maxTasks ?? 8;
+      const utilization = capacity === 0 ? 0 : activeTasks / capacity;
+      return {
+        workerId: w.id,
+        warehouseId,
+        activeTasks,
+        completedTasksToday,
+        capacity,
+        utilization
+      };
+    });
+    return res.json({ warehouseId, workers: activities });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+var getWarehouseMetrics = async (req, res) => {
+  const warehouseId = req.params.id;
+  const access = enforceWarehouseAccess(req, warehouseId);
+  if (!access.ok) return res.status(access.status).json({ error: access.message });
+  try {
+    const svc = new MetricsService();
+    const metrics = await svc.getWarehouseMetrics(warehouseId, /* @__PURE__ */ new Date());
+    return res.json(metrics);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+var getWarehouseBackorders = async (req, res) => {
+  const warehouseId = req.params.id;
+  const access = enforceWarehouseAccess(req, warehouseId);
+  if (!access.ok) return res.status(access.status).json({ error: access.message });
+  try {
+    const now = Date.now();
+    const items = backorderRepo.listByWarehouse(warehouseId).map((b) => ({
+      ...b,
+      waitingSeconds: (now - new Date(b.createdAt).getTime()) / 1e3
+    }));
+    return res.json({ warehouseId, backorders: items });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+var getWarehouseById = async (req, res) => {
+  try {
+    const access = enforceWarehouseAccess(req, req.params.id);
+    if (!access.ok) return res.status(access.status).json({ error: access.message });
+    const wh = warehouseRepo2.findById(req.params.id);
+    if (!wh) return res.status(404).json({ error: "Warehouse not found" });
+    res.json({
+      id: wh.id,
+      name: wh.name,
+      location: {
+        street: wh.location?.street ?? wh.location?.line1,
+        city: wh.location.city,
+        province: wh.location?.province,
+        postal: wh.location.postal,
+        lat: wh.location.lat,
+        lng: wh.location.lng
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -28932,58 +31656,95 @@ router5.get(
   requireRole("ADMIN", "OPS_MANAGER"),
   getWarehouses
 );
+router5.get(
+  "/:id/inventory",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"),
+  getWarehouseInventory
+);
+router5.get(
+  "/:id/workers",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"),
+  getWarehouseWorkers
+);
+router5.get(
+  "/:id",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"),
+  getWarehouseById
+);
 var warehouses_route_default = router5;
 
 // src/api/routes/assignment.route.ts
 var import_express6 = __toESM(require_express3(), 1);
 
 // src/api/controllers/assignment.controller.ts
-var service3 = new TaskService();
-var assignTasks = async (_req, res) => {
+var service3 = new AssignmentService();
+var autoAssignAll = async (_req, res) => {
   try {
-    const result = await service3.autoAssign();
-    res.json({
-      message: `Assigned ${result.assigned} tasks`,
-      details: result.details
+    const assignments = await service3.autoAssignTasks();
+    assignments.forEach(
+      (a) => console.log(
+        `[ASSIGNMENT] Task ${a.taskId} -> Worker ${a.workerId}${a.workerName ? ` (${a.workerName})` : ""}`
+      )
+    );
+    res.json({ ok: true, assignments });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+var processIncomingOrder = async (req, res) => {
+  try {
+    const { orderId, customerName, destination, boxes } = req.body;
+    const result = await service3.createIncomingOrder({
+      orderId,
+      customerName,
+      destination,
+      boxes
+    });
+    return res.status(201).json({
+      ok: true,
+      order: result.order,
+      warehouse: result.warehouse
     });
   } catch (err) {
-    console.error("Auto-assign failed:", err);
+    console.error("processIncomingOrder failed:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
 // src/api/routes/assignment.route.ts
 var router6 = (0, import_express6.Router)();
-router6.post("/", assignTasks);
+router6.post(
+  "/auto",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"),
+  autoAssignAll
+);
+router6.post(
+  "/incoming",
+  processIncomingOrder
+  // intentionally NOT protected
+);
 var assignment_route_default = router6;
 
 // src/api/routes/scan.route.ts
 var import_express7 = __toESM(require_express3(), 1);
 
 // src/api/controllers/scan.controller.ts
-var orderService = new OrderService();
 var taskService = new TaskService();
 var scanBox = async (req, res) => {
   try {
-    const { boxId, userId, warehouseId, zone } = req.body;
-    if (!boxId || !userId || !warehouseId || !zone) {
-      return res.status(400).json({
-        error: "boxId, userId, warehouseId, and zone are required"
-      });
+    const completed = await taskService.completeNextInProgress();
+    if (!completed) {
+      return res.status(404).json({ error: "No in-progress tasks to scan" });
     }
-    const result = await orderService.scanBox({
-      boxId,
-      userId,
-      warehouseId,
-      zone
-    });
-    await taskService.completeTaskForBox(boxId, userId);
     return res.json({
-      orderId: result.order.id,
-      boxId,
-      previousState: result.previousState,
-      newState: result.newState,
-      message: `${zone} scan: ${result.previousState} \u2192 ${result.newState}`
+      ok: true,
+      taskId: completed.id,
+      boxId: completed.boxId,
+      newStatus: completed.status
     });
   } catch (err) {
     console.error("Scan failed:", err);
@@ -29002,7 +31763,7 @@ var import_express8 = __toESM(require_express3(), 1);
 // src/domain/warehouses/warehouse.service.ts
 var WarehouseService = class {
   constructor() {
-    this.repo = new WarehouseRepository();
+    this.repo = warehouseRepo2;
   }
   /** --------------------------------
    * LIST ALL WAREHOUSES
@@ -29014,7 +31775,7 @@ var WarehouseService = class {
    * GET SINGLE WAREHOUSE
    * -------------------------------- */
   async getWarehouse(id) {
-    return this.repo.getWarehouse(id);
+    return this.repo.findById(id);
   }
   /** --------------------------------
    * DETERMINE CLOSEST WAREHOUSE
@@ -29109,15 +31870,151 @@ var WarehouseService = class {
   }
 };
 
+// src/domain/returns/returns.service.ts
+var ReturnsService = class {
+  constructor() {
+    this.orderRepo = orderRepo;
+    this.warehouseService = new WarehouseService();
+  }
+  /** --------------------------------
+   * RECEIVE RETURN PACKAGE
+   *
+   * Sets box state → RETURN_RECEIVED
+   * -------------------------------- */
+  async intakeReturn(boxId, warehouseId) {
+    const box = await this.orderRepo.getBox(boxId);
+    if (!box) throw new Error("Box not found");
+    box.warehouseId = warehouseId;
+    await this.orderRepo.updateBoxState(boxId, "RETURN_RECEIVED");
+    eventLogger.logReturnReceived(warehouseId, boxId);
+    return {
+      boxId,
+      orderId: box.orderId,
+      sku: box.sku,
+      state: "RETURN_RECEIVED",
+      warehouseId
+    };
+  }
+  /** --------------------------------
+   * START QA
+   *
+   * Marks box as under inspection
+   * -------------------------------- */
+  async startQA(boxId) {
+    const box = await this.orderRepo.getBox(boxId);
+    if (!box) throw new Error("Box not found");
+    await this.orderRepo.updateBoxState(boxId, "QA_IN_PROGRESS");
+    if (box.warehouseId) {
+      eventLogger.logReturnQAStart(box.warehouseId, boxId);
+    }
+    return {
+      boxId,
+      orderId: box.orderId,
+      sku: box.sku,
+      state: "QA_IN_PROGRESS"
+    };
+  }
+  /** --------------------------------
+   * FINISH QA → returnCategory to be applied
+   * -------------------------------- */
+  async classify(boxId, category, notes) {
+    const updated = await this.orderRepo.classifyReturn(
+      boxId,
+      category,
+      notes
+    );
+    if (!updated) throw new Error("Failed to classify return");
+    if (category === "FULL_PRICE" || category === "DISCOUNT") {
+      if (!updated.warehouseId) {
+        console.warn("Return has no warehouseId to restock");
+      } else {
+        await this.warehouseService.restock(updated.warehouseId, updated.sku);
+        eventLogger.log(
+          updated.warehouseId,
+          "INVENTORY_INCREASED",
+          `Restocked SKU ${updated.sku} at ${updated.warehouseId}`,
+          { sku: updated.sku }
+        );
+      }
+    }
+    if (updated.warehouseId) {
+      eventLogger.logReturnClassified(updated.warehouseId, boxId, category);
+    }
+    return {
+      boxId,
+      orderId: updated.orderId,
+      sku: updated.sku,
+      category,
+      notes,
+      newState: "RETURN_CLASSIFIED"
+    };
+  }
+  /** --------------------------------
+   * LIST ALL RETURNED BOXES
+   * (for dashboards)
+   * -------------------------------- */
+  async listReturns() {
+    const boxes = await this.orderRepo.listBoxes();
+    const relevant = boxes.filter(
+      (b) => [
+        "RETURN_RECEIVED",
+        "QA_PENDING",
+        "QA_IN_PROGRESS",
+        "QA_DONE",
+        "RETURN_CLASSIFIED"
+      ].includes(b.state)
+    );
+    const events = warehouseEventsRepo.getEventsForWarehouse("ALL", 1e3);
+    return relevant.map((b) => {
+      const order = this.orderRepo.findById(b.orderId);
+      const boxEvents = events.filter((e) => e.meta?.boxId === b.id);
+      const intakeAt = boxEvents.find((e) => e.type === "RETURN_RECEIVED")?.timestamp;
+      const qaStartedAt = boxEvents.find((e) => e.type === "RETURN_QA_STARTED")?.timestamp;
+      const classifiedAt = boxEvents.find((e) => e.type === "RETURN_CLASSIFIED")?.timestamp;
+      return {
+        boxId: b.id,
+        orderId: b.orderId,
+        sku: b.sku,
+        warehouseId: b.warehouseId,
+        state: b.state,
+        category: b.returnCategory,
+        customerName: order?.customerName,
+        destinationAddress: order?.destination?.address ?? order?.destination?.line1,
+        createdAt: intakeAt ?? order?.createdAt,
+        qaStartedAt,
+        classifiedAt,
+        notes: b.notes
+      };
+    });
+  }
+  /** --------------------------------
+   * GET RETURN HISTORY FOR ORDER
+   * -------------------------------- */
+  async getReturnsForOrder(orderId) {
+    const boxes = await this.orderRepo.listBoxes();
+    return boxes.filter((b) => b.orderId === orderId);
+  }
+};
+
 // src/api/controllers/returns.controller.ts
-var orderService2 = new OrderService();
+var orderService = new OrderService();
 var warehouseService = new WarehouseService();
+var returnsService = new ReturnsService();
 var listReturns = async (_req, res) => {
   try {
-    const boxes = await orderService2.getReturnCandidates();
+    const boxes = await orderService.getReturnCandidates();
     res.json(boxes);
   } catch (err) {
     console.error("listReturns failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+var listAllReturns = async (_req, res) => {
+  try {
+    const items = await returnsService.listReturns();
+    res.json(items);
+  } catch (err) {
+    console.error("listAllReturns failed:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -29129,7 +32026,7 @@ var scanReturn = async (req, res) => {
         error: "boxId, userId, and warehouseId are required"
       });
     }
-    const updated = await orderService2.processReturnCheckIn({
+    const updated = await orderService.processReturnCheckIn({
       boxId,
       warehouseId,
       userId
@@ -29149,7 +32046,7 @@ var classifyReturn = async (req, res) => {
         error: "Return category is required"
       });
     }
-    const updatedBox = await orderService2.classifyReturn({
+    const updatedBox = await orderService.classifyReturn({
       boxId,
       category,
       notes
@@ -29170,13 +32067,77 @@ var classifyReturn = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+var startQAForReturn = async (req, res) => {
+  try {
+    const { boxId } = req.params;
+    const result = await returnsService.startQA(boxId);
+    res.json(result);
+  } catch (err) {
+    console.error("startQA failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+var restockReturn = async (req, res) => {
+  try {
+    const { boxId } = req.params;
+    const box = await orderService.getBox(boxId);
+    if (!box?.warehouseId) {
+      return res.status(400).json({ error: "Missing warehouseId for restock" });
+    }
+    await warehouseService.incrementInventory(box.warehouseId, box.sku, 1);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("restock return failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+var getReturnDetail = async (req, res) => {
+  try {
+    const { boxId } = req.params;
+    const box = await orderService.getBox(boxId);
+    if (!box) return res.status(404).json({ error: "Return not found" });
+    const order = await orderService.getOrder(box.orderId);
+    const events = warehouseEventsRepo.getEventsForWarehouse("ALL", 1e3).filter(
+      (e) => e.meta?.boxId === boxId
+    );
+    const receivedAt = events.find((e) => e.type === "RETURN_RECEIVED")?.timestamp;
+    const qaStartedAt = events.find((e) => e.type === "RETURN_QA_STARTED")?.timestamp;
+    const classifiedAt = events.find((e) => e.type === "RETURN_CLASSIFIED")?.timestamp;
+    const restockedAt = events.find((e) => e.type === "INVENTORY_INCREASED")?.timestamp;
+    res.json({
+      boxId: box.id,
+      orderId: box.orderId,
+      sku: box.sku,
+      warehouseId: box.warehouseId,
+      customerName: order?.customerName,
+      destinationAddress: order?.destination?.address ?? order?.destination?.line1 ?? order?.destination?.street,
+      state: box.state,
+      category: box.returnCategory,
+      notes: box.notes,
+      events: events.map((e) => ({
+        eventType: e.type,
+        message: e.message,
+        timestamp: e.timestamp
+      })),
+      timeline: {
+        receivedAt,
+        qaStartedAt,
+        classifiedAt,
+        restockedAt
+      }
+    });
+  } catch (err) {
+    console.error("getReturnDetail failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
 
 // src/api/routes/returns.route.ts
 var router8 = (0, import_express8.Router)();
 router8.get(
   "/",
   requireAuth,
-  requireRole("WAREHOUSE_MANAGER", "WORKER", "OPS_MANAGER"),
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER", "SUPPORT"),
   listReturns
 );
 router8.post(
@@ -29185,11 +32146,35 @@ router8.post(
   requireRole("WAREHOUSE_MANAGER", "WORKER", "OPS_MANAGER"),
   scanReturn
 );
+router8.get(
+  "/all",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER", "SUPPORT"),
+  listAllReturns
+);
 router8.post(
   "/:boxId/classify",
   requireAuth,
   requireRole("QA", "WAREHOUSE_MANAGER", "OPS_MANAGER"),
   classifyReturn
+);
+router8.post(
+  "/:boxId/start-qa",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "QA", "WAREHOUSE_MANAGER"),
+  startQAForReturn
+);
+router8.post(
+  "/:boxId/restock",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"),
+  restockReturn
+);
+router8.get(
+  "/detail/:boxId",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER", "QA"),
+  getReturnDetail
 );
 var returns_route_default = router8;
 
@@ -29197,32 +32182,53 @@ var returns_route_default = router8;
 var import_express9 = __toESM(require_express3(), 1);
 
 // src/api/controllers/analytics.controller.ts
-var orderRepo = new OrderRepository();
-var taskRepo = new TaskRepository();
-var getAnalyticsOverview = async (_req, res) => {
+var metricsService = new MetricsService();
+var getOverview = async (_req, res) => {
   try {
-    const orders2 = await orderRepo.listOrders();
+    const orders2 = orderRepo.listOrders();
     const tasks2 = await taskRepo.listTasks();
-    const boxes = await orderRepo.listBoxes();
-    const activeOrders = orders2.length;
-    const pendingTasks = tasks2.filter((t) => t.status !== "DONE").length;
-    const boxesInTransit = boxes.filter(
-      (b) => ["SHIPPED", "IN_TRANSIT"].includes(b.state)
-    ).length;
-    const returnedThisWeek = boxes.filter(
-      (b) => ["QA_PENDING", "QA_IN_PROGRESS", "QA_DONE", "RETURN_CLASSIFIED"].includes(b.state)
-    ).length;
-    const tasksCompletedToday = tasks2.filter((t) => {
-      if (!t.createdAt) return false;
-      const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
-      return t.createdAt.slice(0, 10) === today && t.status === "DONE";
-    }).length;
+    const workers2 = workerRepo.listWorkers();
+    const warehouses2 = warehouseRepo2.listWarehouses();
+    const orderCountsByStatus = {};
+    for (const o of orders2) {
+      orderCountsByStatus[o.status] = (orderCountsByStatus[o.status] || 0) + 1;
+    }
+    const taskCountsByStatus = {};
+    const taskCountsByType = {};
+    for (const t of tasks2) {
+      taskCountsByStatus[t.status] = (taskCountsByStatus[t.status] || 0) + 1;
+      taskCountsByType[t.type] = (taskCountsByType[t.type] || 0) + 1;
+    }
+    const warehouseLoad = warehouses2.map((w) => {
+      const activeTasks = tasks2.filter(
+        (t) => t.warehouseId === w.id && t.status !== "DONE"
+      ).length;
+      const utilization = w.dailyCapacity ? activeTasks / w.dailyCapacity : 0;
+      return {
+        id: w.id,
+        name: w.name,
+        activeTasks,
+        capacity: w.dailyCapacity,
+        utilization
+      };
+    });
+    const workerUtilization = workers2.map((w) => {
+      const utilization = w.maxTasks ? w.currentTasks / w.maxTasks : 0;
+      return {
+        id: w.id,
+        name: w.name,
+        warehouseId: w.warehouseId,
+        currentTasks: w.currentTasks,
+        maxTasks: w.maxTasks,
+        utilization
+      };
+    });
+    const lowStock = warehouseRepo2.getLowStock();
     res.json({
-      activeOrders,
-      pendingTasks,
-      boxesInTransit,
-      returnedThisWeek,
-      tasksCompletedToday
+      orders: { total: orders2.length, byStatus: orderCountsByStatus },
+      tasks: { total: tasks2.length, byStatus: taskCountsByStatus, byType: taskCountsByType },
+      warehouses: { load: warehouseLoad, lowStock },
+      workers: { utilization: workerUtilization }
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -29268,6 +32274,30 @@ var getReturnAnalytics = async (_req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+var getLowStock = (_req, res) => {
+  try {
+    const low = warehouseRepo2.getLowStock();
+    res.json(low);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+var getSlaMetrics = async (_req, res) => {
+  try {
+    const sla = await metricsService.getSlaMetrics();
+    res.json({ sla });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+var getReturnMetrics = async (_req, res) => {
+  try {
+    const returns = await metricsService.getReturnMetrics();
+    res.json({ returns });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 // src/api/routes/analytics.route.ts
 var router9 = (0, import_express9.Router)();
@@ -29275,7 +32305,7 @@ router9.get(
   "/overview",
   requireAuth,
   requireRole("ADMIN", "OPS_MANAGER", "ANALYTICS"),
-  getAnalyticsOverview
+  getOverview
 );
 router9.get(
   "/orders-status",
@@ -29294,6 +32324,24 @@ router9.get(
   requireAuth,
   requireRole("ADMIN", "OPS_MANAGER", "ANALYTICS"),
   getReturnAnalytics
+);
+router9.get(
+  "/low-stock",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "ANALYTICS", "WAREHOUSE_MANAGER"),
+  getLowStock
+);
+router9.get(
+  "/sla",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "ANALYTICS"),
+  getSlaMetrics
+);
+router9.get(
+  "/returns/metrics",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "ANALYTICS"),
+  getReturnMetrics
 );
 var analytics_route_default = router9;
 
@@ -29315,33 +32363,607 @@ router10.get("/me", requireAuth, (req, res) => {
 });
 var auth_route_default = router10;
 
-// src/api/index.ts
-var workerRepo = new WorkerRepository();
-var warehouseRepo = new WarehouseRepository();
-var customerRepo = new CustomerRepository();
-var orderRepo2 = new OrderRepository();
-workerRepo.seedIfEmpty();
-warehouseRepo.seedIfEmpty();
-customerRepo.seedIfEmpty();
-orderRepo2.seedIfEmpty();
+// src/api/routes/simulator.route.ts
+var import_express11 = __toESM(require_express3(), 1);
+
+// src/domain/simulator/geo/canadaLocations.ts
+var CANADIAN_CITIES = [
+  { city: "Toronto", lat: 43.65107, lng: -79.347015, weight: 18 },
+  { city: "Montreal", lat: 45.50189, lng: -73.56739, weight: 16 },
+  { city: "Vancouver", lat: 49.28273, lng: -123.120735, weight: 10 },
+  { city: "Calgary", lat: 51.04427, lng: -114.062019, weight: 8 },
+  { city: "Edmonton", lat: 53.546124, lng: -113.493823, weight: 7 },
+  { city: "Ottawa", lat: 45.42153, lng: -75.697193, weight: 6 },
+  { city: "Winnipeg", lat: 49.895077, lng: -97.138451, weight: 5 },
+  { city: "Halifax", lat: 44.6488, lng: -63.57524, weight: 3 },
+  { city: "Quebec City", lat: 46.813878, lng: -71.207981, weight: 3 },
+  { city: "Saskatoon", lat: 52.133214, lng: -106.670046, weight: 2 },
+  { city: "Regina", lat: 50.44521, lng: -104.618896, weight: 2 }
+];
+function pickRandomCanadianCityWeighted() {
+  const totalWeight = CANADIAN_CITIES.reduce((sum, c) => sum + c.weight, 0);
+  let roll = Math.random() * totalWeight;
+  for (const city of CANADIAN_CITIES) {
+    roll -= city.weight;
+    if (roll <= 0) {
+      return { city: city.city, lat: city.lat, lng: city.lng };
+    }
+  }
+  const fallback = CANADIAN_CITIES[0];
+  return { city: fallback.city, lat: fallback.lat, lng: fallback.lng };
+}
+
+// src/api/controllers/simulator.controller.ts
+var assignment = new AssignmentService();
+var generateSimulatedOrder = async (req, res) => {
+  try {
+    const simSecret = process.env.SIMULATOR_SHARED_SECRET;
+    const headerKey = req.headers["x-simulator-key"];
+    console.log("[SIM-KEY] expected:", simSecret);
+    console.log("[SIM-KEY] received:", headerKey);
+    if (!simSecret) {
+      console.error("SIMULATOR_SHARED_SECRET not set");
+      return res.status(500).json({ error: "Simulator secret missing" });
+    }
+    if (!headerKey) {
+      return res.status(403).json({ error: "Missing simulator key" });
+    }
+    if (headerKey !== simSecret) {
+      return res.status(403).json({ error: "Invalid simulator key" });
+    }
+    const body = req.body;
+    const incomingSkus = body?.boxes?.map((b) => b.sku) ?? body?.items?.map((i) => i.sku) ?? [];
+    const invalid = incomingSkus.find((sku) => sku && !ALL_SKUS.includes(sku));
+    if (invalid) {
+      return res.status(400).json({ error: `Unknown SKU: ${invalid}` });
+    }
+    const result = await assignment.createIncomingOrder(body);
+    return res.json({
+      ok: true,
+      order: result.order,
+      warehouse: result.warehouse
+    });
+  } catch (err) {
+    console.error("Simulator order failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+var getRandomDestination = (_req, res) => {
+  const { city, lat, lng } = pickRandomCanadianCityWeighted();
+  res.json({
+    destination: { lat, lng },
+    city
+  });
+};
+
+// src/middleware/devBypass.middleware.ts
+function devBypassAuth(req, _res, next) {
+  console.log("DEV-BYPASS middleware running. NODE_ENV:", process.env.NODE_ENV, "IS_OFFLINE:", process.env.IS_OFFLINE);
+  const isLocal = process.env.IS_OFFLINE === "true" || process.env.NODE_ENV === "development";
+  if (isLocal) {
+    req.user = {
+      id: "DEV-ADMIN",
+      role: "ADMIN",
+      warehouseId: "WH-TOR-01"
+    };
+    console.log("DEV-BYPASS injected user:", req.user);
+  }
+  next();
+}
+
+// src/api/routes/simulator.route.ts
 var router11 = (0, import_express11.Router)();
-router11.use("/auth", auth_route_default);
-router11.use("/scan", scan_route_default);
-router11.use(requireAuth);
-router11.use("/orders", orders_route_default);
-router11.use("/tasks", tasks_route_default);
-router11.use("/customers", customers_route_default);
-router11.use("/workers", workers_route_default);
-router11.use("/warehouses", warehouses_route_default);
-router11.use("/assign", assignment_route_default);
-router11.use("/returns", returns_route_default);
-router11.use("/analytics", analytics_route_default);
-var api_default = router11;
+router11.post("/orders", devBypassAuth, generateSimulatedOrder);
+router11.get("/random-destination", getRandomDestination);
+var simulator_route_default = router11;
+
+// src/api/routes/integrations.route.ts
+var import_express12 = __toESM(require_express3(), 1);
+
+// src/domain/integrations/integration.service.ts
+var IntegrationOrderService = class {
+  async createCOSOrderFromExternal(payload) {
+    if (!payload.items || payload.items.length === 0) {
+      throw new Error("Order must contain at least one item");
+    }
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    const orderId = `ord_${Date.now()}`;
+    const warehouseId = "wh1";
+    const boxes = payload.items.map((item, index) => ({
+      id: `box_${orderId}_${index + 1}`,
+      orderId,
+      sku: item.sku,
+      qty: item.qty,
+      warehouseId,
+      state: "PENDING_PICK"
+      // compatible with our task model
+    }));
+    const totalAmount = payload.items.reduce(
+      (sum, item) => sum + item.qty * item.unitPrice,
+      0
+    );
+    const order = {
+      id: orderId,
+      externalOrderId: payload.externalOrderId,
+      customerName: payload.customerName,
+      customerEmail: payload.customerEmail,
+      deliveryCity: payload.deliveryCity,
+      deliveryPostal: payload.deliveryPostal,
+      deliveryLine1: payload.deliveryLine1 ?? "Unknown address line",
+      country: payload.country ?? "CA",
+      source: payload.source ?? "external",
+      warehouseId,
+      status: "PENDING_PICK",
+      // initial status for new orders
+      boxes,
+      totalAmount,
+      currency: payload.items[0]?.currency ?? "CAD",
+      createdAt: now,
+      updatedAt: now
+    };
+    await orderRepo.saveOrder(order);
+    for (const box of boxes) {
+      const task = {
+        id: `task_${box.id}`,
+        orderId,
+        boxId: box.id,
+        warehouseId,
+        workerId: null,
+        // will be assigned by /assign/auto
+        status: "PENDING_PICK",
+        type: "PICK",
+        createdAt: now
+      };
+      await taskRepo.saveTask(task);
+    }
+    return order;
+  }
+};
+
+// src/api/controllers/integrations.controller.ts
+var integrationService = new IntegrationOrderService();
+var INTEGRATION_SECRET = process.env.INTEGRATION_SHARED_SECRET;
+var createExternalOrder = async (req, res) => {
+  try {
+    const headerKey = req.header("x-integration-key");
+    if (!INTEGRATION_SECRET) {
+      console.error(
+        "INTEGRATION_SHARED_SECRET is not set in backend .env \u2013 refusing integration"
+      );
+      return res.status(500).json({ error: "Integration secret not configured on server" });
+    }
+    if (!headerKey || headerKey !== INTEGRATION_SECRET) {
+      return res.status(401).json({ error: "Invalid integration key" });
+    }
+    const payload = req.body;
+    const invalid = payload.items?.find((i) => !ALL_SKUS.includes(i.sku));
+    if (invalid) {
+      return res.status(400).json({ error: `Unknown SKU: ${invalid.sku}` });
+    }
+    const order = await integrationService.createCOSOrderFromExternal(payload);
+    return res.status(201).json({
+      ok: true,
+      orderId: order.id,
+      order
+    });
+  } catch (err) {
+    console.error("createExternalOrder failed:", err);
+    return res.status(400).json({ error: err?.message ?? "Failed to create external order" });
+  }
+};
+
+// src/api/routes/integrations.route.ts
+var router12 = (0, import_express12.Router)();
+router12.post("/orders", createExternalOrder);
+var integrations_route_default = router12;
+
+// src/api/routes/metadata.route.ts
+var import_express13 = __toESM(require_express3(), 1);
+var router13 = (0, import_express13.Router)();
+router13.get("/skus", (_req, res) => {
+  res.json({ skus: ALL_SKUS });
+});
+var metadata_route_default = router13;
+
+// src/api/routes/analyticsLowStock.route.ts
+var import_express14 = __toESM(require_express3(), 1);
+var router14 = (0, import_express14.Router)();
+router14.get("/", (_req, res) => {
+  const warehouses2 = warehouseRepo2.listWarehouses();
+  const payload = warehouses2.map((w) => {
+    const lowStock = Object.entries(w.inventory ?? {}).filter(
+      ([, qty]) => qty <= LOW_STOCK_THRESHOLD
+    ).map(([sku, qty]) => ({ sku, qty }));
+    return { warehouseId: w.id, lowStock };
+  });
+  res.json(payload);
+});
+var analyticsLowStock_route_default = router14;
+
+// src/api/routes/skus.route.ts
+var import_express15 = __toESM(require_express3(), 1);
+var router15 = (0, import_express15.Router)();
+router15.get("/", (_req, res) => {
+  console.log("[SKUS ROUTE] returning", ALL_SKUS.length, "SKUs");
+  res.json({ skus: ALL_SKUS });
+});
+var skus_route_default = router15;
+
+// src/api/routes/warehouseMetrics.route.ts
+var import_express16 = __toESM(require_express3(), 1);
+var router16 = (0, import_express16.Router)();
+router16.get(
+  "/:id/metrics",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"),
+  getWarehouseMetrics
+);
+router16.get(
+  "/:id/backorders",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"),
+  getWarehouseBackorders
+);
+var warehouseMetrics_route_default = router16;
+
+// src/api/routes/warehouseEvents.route.ts
+var import_express17 = __toESM(require_express3(), 1);
+
+// src/api/controllers/warehouseEvents.controller.ts
+var getWarehouseEvents = async (req, res) => {
+  const { id } = req.params;
+  const limit = Number(req.query.limit ?? 50) || 50;
+  const user = req.user;
+  if (!user) return res.status(401).json({ error: "Not authenticated" });
+  if (!(user.role === "ADMIN" || user.role === "OPS_MANAGER") && !(user.role === "WAREHOUSE_MANAGER" && user.warehouseId === id)) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  const events = warehouseEventsRepo.getEventsForWarehouse(id, limit);
+  return res.json({ warehouseId: id, events });
+};
+
+// src/api/routes/warehouseEvents.route.ts
+var router17 = (0, import_express17.Router)();
+router17.get(
+  "/:id/events",
+  requireAuth,
+  requireRole("ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"),
+  getWarehouseEvents
+);
+var warehouseEvents_route_default = router17;
+
+// src/api/routes/warehouseEvents.stream.route.ts
+var import_express18 = __toESM(require_express3(), 1);
+var router18 = (0, import_express18.Router)();
+router18.get(
+  "/stream",
+  requireAuth,
+  requireRole("ADMIN"),
+  (req, res) => {
+    sseManager.addClient("ALL", res, req.headers.origin);
+    req.on("close", () => sseManager.removeClient("ALL", res));
+  }
+);
+router18.get(
+  "/:id/events/stream",
+  requireAuth,
+  requireRole("ADMIN", "WAREHOUSE_MANAGER"),
+  (req, res) => {
+    const warehouseId = req.params.id;
+    const user = req.user;
+    if (user?.role === "WAREHOUSE_MANAGER" && user.warehouseId !== warehouseId) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    sseManager.addClient(warehouseId, res, req.headers.origin);
+    req.on("close", () => sseManager.removeClient(warehouseId, res));
+  }
+);
+var warehouseEvents_stream_route_default = router18;
+
+// src/api/routes/ops.route.ts
+var import_express19 = __toESM(require_express3(), 1);
+
+// src/domain/ops/metrics.service.ts
+var STUCK_THRESHOLD_MS = 30 * 60 * 1e3;
+var WINDOW_MS = 60 * 1e3;
+var OpsMetricsService = class {
+  computeOrdersByStatus() {
+    const result = {};
+    for (const o of orderRepo.listOrders()) {
+      result[o.status] = (result[o.status] ?? 0) + 1;
+    }
+    return result;
+  }
+  computeTasksByStatus() {
+    return {};
+  }
+  async computeSummary(now) {
+    const orders2 = orderRepo.listOrders();
+    const tasks2 = await taskRepo.listTasks();
+    const backorders2 = backorderRepo.listByWarehouse("ALL").length;
+    const activeOrders = orders2.length;
+    const activeTasks = tasks2.filter((t) => t.status !== "DONE").length;
+    const ordersByStatus = {};
+    for (const o of orders2) {
+      ordersByStatus[o.status] = (ordersByStatus[o.status] ?? 0) + 1;
+    }
+    const tasksByStatus = {};
+    for (const t of tasks2) {
+      tasksByStatus[t.status] = (tasksByStatus[t.status] ?? 0) + 1;
+    }
+    const warehouseSummaries = warehouseRepo2.listWarehouses().map((w) => {
+      const activeTasksForWh = tasks2.filter((t) => t.warehouseId === w.id && t.status !== "DONE").length;
+      const capacity = workerRepo.getWorkersByWarehouse(w.id)?.reduce((sum, wk) => sum + (wk.capacity ?? wk.maxTasks ?? 0), 0) ?? 0;
+      const utilization = capacity === 0 ? 0 : activeTasksForWh / capacity;
+      const lowInventory = warehouseRepo2.getLowStock().some((it) => it.warehouseId === w.id);
+      const backordersForWh = backorderRepo.listByWarehouse(w.id).length;
+      return {
+        id: w.id,
+        name: w.name,
+        activeTasks: activeTasksForWh,
+        capacity,
+        utilization,
+        backorders: backordersForWh,
+        lowInventory
+      };
+    });
+    const oneMinuteAgo = now - WINDOW_MS;
+    const ordersPerMin = orders2.filter((o) => new Date(o.createdAt).getTime() >= oneMinuteAgo).length;
+    const tasksPerMin = tasks2.filter((t) => {
+      const ts = t.createdAt ? new Date(t.createdAt).getTime() : 0;
+      return ts >= oneMinuteAgo;
+    }).length;
+    const scansPerMin = tasksPerMin;
+    return {
+      activeOrders,
+      activeTasks,
+      ordersByStatus,
+      tasksByStatus,
+      backorders: backorders2,
+      warehouses: warehouseSummaries,
+      throughput: {
+        ordersPerMin,
+        tasksPerMin,
+        scansPerMin
+      }
+    };
+  }
+  async detectStuckTasks(now) {
+    const tasks2 = await taskRepo.listTasks();
+    return tasks2.filter(
+      (t) => t.status === "IN_PROGRESS" && (t.createdAt ? new Date(t.createdAt).getTime() : 0) <= now - STUCK_THRESHOLD_MS
+    );
+  }
+  detectLowInventory() {
+    return warehouseRepo2.getLowStock();
+  }
+  getBackorderSummary(now) {
+    const open = backorderRepo.listOpen();
+    const totalOpenBackorders = open.length;
+    const totalBackorderedUnits = open.reduce((sum, b) => sum + (b.requestedQty ?? 0), 0);
+    const oldest = open.reduce((acc, b) => {
+      const age = now - new Date(b.createdAt).getTime();
+      const mins = age / (60 * 1e3);
+      if (acc === null || mins > acc) return mins;
+      return acc;
+    }, null);
+    const byWarehouse = {};
+    for (const b of open) {
+      const wh = b.warehouseId;
+      byWarehouse[wh] = byWarehouse[wh] || {
+        openCount: 0,
+        openUnits: 0,
+        oldestOpenAgeMinutes: null
+      };
+      byWarehouse[wh].openCount += 1;
+      byWarehouse[wh].openUnits += b.requestedQty ?? 0;
+      const mins = (now - new Date(b.createdAt).getTime()) / (60 * 1e3);
+      if (byWarehouse[wh].oldestOpenAgeMinutes === null || mins > byWarehouse[wh].oldestOpenAgeMinutes) {
+        byWarehouse[wh].oldestOpenAgeMinutes = mins;
+      }
+    }
+    return {
+      totalOpenBackorders,
+      totalBackorderedUnits,
+      oldestOpenBackorderAgeMinutes: oldest,
+      byWarehouse
+    };
+  }
+  async getWarehouseOpsSnapshot(warehouseId, now) {
+    const tasks2 = await taskRepo.listTasks();
+    const activeTasksForWh = tasks2.filter((t) => t.warehouseId === warehouseId && t.status !== "DONE").length;
+    const capacity = workerRepo.getWorkersByWarehouse(warehouseId)?.reduce((sum, wk) => sum + (wk.capacity ?? wk.maxTasks ?? 0), 0) ?? 0;
+    const utilization = capacity === 0 ? 0 : activeTasksForWh / capacity;
+    const openBackorders = backorderRepo.listOpenByWarehouse(warehouseId);
+    const openBackorderedUnits = openBackorders.reduce(
+      (sum, b) => sum + (b.requestedQty ?? 0),
+      0
+    );
+    const oldestBackorderAgeMinutes = openBackorders.length === 0 ? null : Math.max(
+      ...openBackorders.map(
+        (b) => (now - new Date(b.createdAt).getTime()) / (60 * 1e3)
+      )
+    );
+    const wh = warehouseRepo2.findById(warehouseId);
+    return {
+      warehouseId,
+      warehouseName: wh?.name,
+      activeTasks: activeTasksForWh,
+      capacity,
+      utilization,
+      openBackorders: openBackorders.length,
+      openBackorderedUnits,
+      oldestBackorderAgeMinutes
+    };
+  }
+};
+
+// src/api/controllers/ops.controller.ts
+var metricsService2 = new OpsMetricsService();
+var getOpsSummary = async (req, res) => {
+  const user = req.user;
+  if (!user || user.role !== "ADMIN") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  try {
+    const now = Date.now();
+    const summary = await metricsService2.computeSummary(now);
+    return res.json(summary);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+var getOpsExceptions = async (req, res) => {
+  const user = req.user;
+  if (!user || user.role !== "ADMIN") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  try {
+    const limit = Number(req.query.limit ?? 50) || 50;
+    const events = warehouseEventsRepo.getEventsForWarehouse("ALL", limit * 2).filter(
+      (e) => ["BACKORDER_CREATED", "TASK_FAILED", "LOW_STOCK", "STUCK_TASK"].includes(e.type)
+    ).slice(0, limit);
+    const now = Date.now();
+    const stuck = await metricsService2.detectStuckTasks(now);
+    const stuckEvents = stuck.map((t) => ({
+      id: `stuck-${t.id}`,
+      warehouseId: t.warehouseId,
+      type: "STUCK_TASK",
+      message: `Task ${t.id} stuck in IN_PROGRESS`,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      meta: { taskId: t.id }
+    }));
+    const lowInv = metricsService2.detectLowInventory().map((i) => ({
+      id: `low-${i.warehouseId}-${i.sku}`,
+      warehouseId: i.warehouseId,
+      type: "LOW_STOCK",
+      message: `Low stock ${i.sku} (${i.quantity})`,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      meta: { sku: i.sku, quantity: i.quantity }
+    }));
+    const backorderCount = backorderRepo.listByWarehouse("ALL").length;
+    const backorderEvents = backorderCount > 0 ? [
+      {
+        id: `bo-${Date.now()}`,
+        warehouseId: "ALL",
+        type: "BACKORDER_CREATED",
+        message: `${backorderCount} backorders open`,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      }
+    ] : [];
+    const combined = [...events, ...stuckEvents, ...lowInv, ...backorderEvents].slice().sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limit);
+    return res.json({ exceptions: combined });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+var getBackorderMetrics = async (req, res) => {
+  const user = req.user;
+  if (!user || user.role !== "ADMIN") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  try {
+    const now = Date.now();
+    const summary = metricsService2.getBackorderSummary(now);
+    return res.json({ summary });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// src/api/routes/ops.route.ts
+var router19 = (0, import_express19.Router)();
+router19.get("/summary", requireAuth, requireRole("ADMIN"), getOpsSummary);
+router19.get("/exceptions", requireAuth, requireRole("ADMIN"), getOpsExceptions);
+router19.get("/backorders/summary", requireAuth, requireRole("ADMIN"), getBackorderMetrics);
+var ops_route_default = router19;
+
+// src/api/index.ts
+var customerRepo = new CustomerRepository();
+workerRepo.seedIfEmpty();
+warehouseRepo2.seedIfEmpty();
+customerRepo.seedIfEmpty?.();
+orderRepo.seedIfEmpty?.();
+var router20 = (0, import_express20.Router)();
+router20.use(devBypassAuth);
+router20.use("/metadata", metadata_route_default);
+router20.use("/skus", skus_route_default);
+router20.use("/auth", auth_route_default);
+router20.use("/scan", scan_route_default);
+router20.use("/integrations", integrations_route_default);
+router20.use("/simulator", simulator_route_default);
+router20.use(requireAuth);
+router20.use("/orders", orders_route_default);
+router20.use("/tasks", tasks_route_default);
+router20.use("/customers", customers_route_default);
+router20.use("/workers", workers_route_default);
+router20.use("/warehouses", warehouseEvents_stream_route_default);
+router20.use("/warehouses", warehouses_route_default);
+router20.use("/warehouses", warehouseMetrics_route_default);
+router20.use("/warehouses", warehouseEvents_route_default);
+router20.use("/ops", ops_route_default);
+router20.use("/assign", assignment_route_default);
+router20.use("/returns", returns_route_default);
+router20.use("/analytics", analytics_route_default);
+router20.use("/analytics/low-stock", analyticsLowStock_route_default);
+var api_default = router20;
+
+// src/seed/workers.seed.ts
+var roles = [
+  "PICKER",
+  "PICKER",
+  "PICKER",
+  "PICKER",
+  "PACKER",
+  "PACKER",
+  "PACKER",
+  "SHIPPER",
+  "SHIPPER",
+  "QA"
+];
+var workerSeed = warehouseSeed.flatMap((wh) => {
+  return Array.from({ length: 10 }).map((_, i) => ({
+    id: `${wh.id}-W${i + 1}`,
+    name: `Worker ${wh.id}-${i + 1}`,
+    role: roles[i],
+    zone: roles[i] === "QA" ? "QA" : roles[i] === "PACKER" ? "PACKING" : "PICKING",
+    currentTasks: 0,
+    maxTasks: roles[i] === "QA" ? 5 : roles[i] === "PICKER" ? 12 : 8,
+    capacity: roles[i] === "QA" ? 5 : roles[i] === "PICKER" ? 12 : 8,
+    currentLoad: 0,
+    lastAssignedAt: 0,
+    active: true,
+    warehouseId: wh.id,
+    homeBase: {
+      line1: "N/A",
+      city: wh.location.city,
+      postal: wh.location.postal,
+      lat: wh.location.lat + (Math.random() - 0.5) * 0.03,
+      lng: wh.location.lng + (Math.random() - 0.5) * 0.03
+    },
+    activeTaskIds: [],
+    createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+  }));
+});
+
+// src/seed/seed.ts
+function runAllSeeds() {
+  console.log("\u{1F331} Running Mini-COS seeds...");
+  warehouseRepo2.seedIfEmpty(warehouseSeed);
+  workerRepo.seedIfEmpty(workerSeed);
+  orderRepo.seedIfEmpty?.();
+  taskRepo.seedIfEmpty?.();
+  console.log("\u{1F331} Seeding complete!");
+}
 
 // src/index.ts
-var app = (0, import_express12.default)();
+console.log("NODE_ENV is:", process.env.NODE_ENV);
+var app = (0, import_express21.default)();
 app.use((0, import_cors.default)());
-app.use(import_express12.default.json());
+app.use(import_express21.default.json());
+app.use(devBypassAuth);
+runAllSeeds();
 app.use("/api", api_default);
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });

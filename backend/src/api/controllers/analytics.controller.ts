@@ -1,42 +1,68 @@
 // backend/src/api/controllers/analytics.controller.ts
 import type { Request, Response } from "express";
-import { OrderRepository } from "../../domain/orders/order.repository";
-import { TaskRepository } from "../../domain/tasks/task.repository";
+import { orderRepo, taskRepo, warehouseRepo, workerRepo } from "../../domain/sharedRepos";
+import { MetricsService } from "../../domain/metrics/metrics.service";
+import type { SlaMetrics, ReturnMetrics } from "../../types";
 
-const orderRepo = new OrderRepository();
-const taskRepo = new TaskRepository();
+const metricsService = new MetricsService();
 
 /** --------------------------------
  * GET /analytics/overview
  * -------------------------------- */
-export const getAnalyticsOverview = async (_req: Request, res: Response) => {
+export const getOverview = async (_req: Request, res: Response) => {
   try {
-    const orders = await orderRepo.listOrders();
+    const orders = orderRepo.listOrders();
     const tasks = await taskRepo.listTasks();
-    const boxes = await orderRepo.listBoxes();
+    const workers = workerRepo.listWorkers();
+    const warehouses = warehouseRepo.listWarehouses();
 
-    const activeOrders = orders.length;
-    const pendingTasks = tasks.filter((t) => t.status !== "DONE").length;
-    const boxesInTransit = boxes.filter((b) =>
-      ["SHIPPED", "IN_TRANSIT"].includes(b.state)
-    ).length;
+    const orderCountsByStatus: Record<string, number> = {};
+    for (const o of orders) {
+      orderCountsByStatus[o.status] = (orderCountsByStatus[o.status] || 0) + 1;
+    }
 
-    const returnedThisWeek = boxes.filter((b) =>
-      ["QA_PENDING", "QA_IN_PROGRESS", "QA_DONE", "RETURN_CLASSIFIED"].includes(b.state)
-    ).length;
+    const taskCountsByStatus: Record<string, number> = {};
+    const taskCountsByType: Record<string, number> = {};
+    for (const t of tasks) {
+      taskCountsByStatus[t.status] = (taskCountsByStatus[t.status] || 0) + 1;
+      taskCountsByType[t.type] = (taskCountsByType[t.type] || 0) + 1;
+    }
 
-    const tasksCompletedToday = tasks.filter((t) => {
-      if (!t.createdAt) return false;
-      const today = new Date().toISOString().slice(0, 10);
-      return t.createdAt.slice(0, 10) === today && t.status === "DONE";
-    }).length;
+    const warehouseLoad = warehouses.map((w) => {
+      const activeTasks = tasks.filter(
+        (t) => t.warehouseId === w.id && t.status !== "DONE"
+      ).length;
+      const utilization = w.dailyCapacity
+        ? activeTasks / w.dailyCapacity
+        : 0;
+      return {
+        id: w.id,
+        name: w.name,
+        activeTasks,
+        capacity: w.dailyCapacity,
+        utilization,
+      };
+    });
+
+    const workerUtilization = workers.map((w) => {
+      const utilization = w.maxTasks ? w.currentTasks / w.maxTasks : 0;
+      return {
+        id: w.id,
+        name: w.name,
+        warehouseId: w.warehouseId,
+        currentTasks: w.currentTasks,
+        maxTasks: w.maxTasks,
+        utilization,
+      };
+    });
+
+    const lowStock = warehouseRepo.getLowStock();
 
     res.json({
-      activeOrders,
-      pendingTasks,
-      boxesInTransit,
-      returnedThisWeek,
-      tasksCompletedToday,
+      orders: { total: orders.length, byStatus: orderCountsByStatus },
+      tasks: { total: tasks.length, byStatus: taskCountsByStatus, byType: taskCountsByType },
+      warehouses: { load: warehouseLoad, lowStock },
+      workers: { utilization: workerUtilization },
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -99,6 +125,36 @@ export const getReturnAnalytics = async (_req: Request, res: Response) => {
     }
 
     res.json({ states, categories });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/** --------------------------------
+ * GET /analytics/low-stock
+ * -------------------------------- */
+export const getLowStock = (_req: Request, res: Response) => {
+  try {
+    const low = warehouseRepo.getLowStock();
+    res.json(low);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getSlaMetrics = async (_req: Request, res: Response) => {
+  try {
+    const sla: SlaMetrics = await metricsService.getSlaMetrics();
+    res.json({ sla });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getReturnMetrics = async (_req: Request, res: Response) => {
+  try {
+    const returns: ReturnMetrics = await metricsService.getReturnMetrics();
+    res.json({ returns });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

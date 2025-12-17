@@ -1,4 +1,4 @@
-import api from "./apiClient";
+import { api } from "./apiClient";
 import type { Order } from "../lib/types";
 
 export async function fetchOrders(): Promise<Order[]> {

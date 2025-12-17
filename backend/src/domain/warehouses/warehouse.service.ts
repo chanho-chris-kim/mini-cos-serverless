@@ -1,10 +1,10 @@
 // backend/src/domain/warehouses/warehouse.service.ts
-import { WarehouseRepository } from "./warehouse.repository";
+import { warehouseRepo } from "../sharedRepos";
 import type { Warehouse } from "../../types";
 import type { OrderEntity } from "../orders/order.model";
 
 export class WarehouseService {
-  private repo = new WarehouseRepository();
+  private repo = warehouseRepo;
 
   /** --------------------------------
    * LIST ALL WAREHOUSES
@@ -17,7 +17,7 @@ export class WarehouseService {
    * GET SINGLE WAREHOUSE
    * -------------------------------- */
   async getWarehouse(id: string): Promise<Warehouse | null> {
-    return this.repo.getWarehouse(id);
+    return this.repo.findById(id);
   }
 
   /** --------------------------------

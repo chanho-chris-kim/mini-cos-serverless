@@ -7,9 +7,13 @@ export const routePermissions: Record<string, string[]> = {
   "/tasks": ["ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"],
   "/scan": ["WORKER", "OPS_MANAGER", "WAREHOUSE_MANAGER"],
   "/returns": ["QA", "OPS_MANAGER", "WAREHOUSE_MANAGER"],
+  "/returns/:id": ["QA", "OPS_MANAGER", "WAREHOUSE_MANAGER", "ADMIN"],
+  "/returns-dashboard": ["ADMIN", "OPS_MANAGER", "WAREHOUSE_MANAGER"],
   "/warehouses": ["ADMIN", "OPS_MANAGER"],
+  "/warehouses/:id": ["ADMIN", "OPS_MANAGER"],
   "/workers": ["ADMIN", "OPS_MANAGER"],
   "/analytics": ["ADMIN", "OPS_MANAGER", "ANALYTICS"],
+  "/ops": ["ADMIN"],
 };
 
 export function canAccess(user: User | null, path: string) {

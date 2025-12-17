@@ -1,4 +1,4 @@
-// Simple internal user model for auth
+// backend/src/domain/auth/user.model.ts
 
 export type Role =
   | "ADMIN"
@@ -7,7 +7,8 @@ export type Role =
   | "WORKER"
   | "QA"
   | "SUPPORT"
-  | "ANALYTICS";
+  | "ANALYTICS"
+  | "INTEGRATION";
 
 export interface AuthUser {
   id: string;
@@ -16,9 +17,9 @@ export interface AuthUser {
   role: Role;
   warehouseId?: string;
   workerId?: string;
-  // NOTE: stored as plain text for demo. In a real system, this would be a bcrypt hash.
-  password: string;
+  /** bcrypt hash of the password */
+  passwordHash: string;
 }
 
-// What we send back to frontend (no password)
-export type PublicUser = Omit<AuthUser, "password">;
+// What we expose to the frontend (no password)
+export type PublicUser = Omit<AuthUser, "passwordHash">;

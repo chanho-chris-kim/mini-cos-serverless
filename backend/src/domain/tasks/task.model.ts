@@ -1,6 +1,6 @@
 // backend/src/domain/tasks/task.model.ts
-export type TaskType = "PICK" | "PACK" | "SHIP" | "QA" | "REFURBISH";
-export type TaskStatus = "PENDING_PICK" | "IN_PROGRESS" | "DONE" | "FAILED";
+export type TaskType = "PICK" | "PACK" | "SHIP";
+export type TaskStatus = "PENDING" | "PENDING_PICK" | "IN_PROGRESS" | "DONE" | "FAILED";
 
 export interface TaskEntity {
   id: string;
@@ -8,6 +8,7 @@ export interface TaskEntity {
   boxId: string;
   warehouseId: string;
   workerId: string | null;
+  type: TaskType;
   status: TaskStatus;
   createdAt: string;
 }

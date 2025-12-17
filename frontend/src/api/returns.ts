@@ -1,23 +1,14 @@
 // frontend/src/api/returns.ts
-import api from "./apiClient";
-import type { Box, ReturnCategory } from "../lib/types";
+import { api } from "./apiClient";
 
-/**
- * GET /returns
- * Returns all boxes currently in the returns/QA pipeline.
- */
-export async function fetchReturns(): Promise<Box[]> {
+export async function getReturnCandidates() {
   const res = await api.get("/returns");
   return res.data;
 }
 
-/**
- * POST /returns/:boxId/classify
- * Classify the return after QA inspection.
- */
 export async function classifyReturn(
   boxId: string,
-  category: ReturnCategory,
+  category: string,
   notes?: string
 ) {
   const res = await api.post(`/returns/${boxId}/classify`, {
@@ -27,19 +18,22 @@ export async function classifyReturn(
   return res.data;
 }
 
-/**
- * POST /returns/scan
- * Used when a returned box arrives at the warehouse.
- */
-export async function scanReturn(
-  boxId: string,
-  userId: string,
-  warehouseId: string
-) {
-  const res = await api.post(`/returns/scan`, {
-    boxId,
-    userId,
-    warehouseId,
-  });
+export async function fetchAllReturns() {
+  const res = await api.get("/returns/all");
+  return res.data;
+}
+
+export async function fetchReturnDetail(boxId: string) {
+  const res = await api.get(`/returns/detail/${boxId}`);
+  return res.data;
+}
+
+export async function startQA(boxId: string) {
+  const res = await api.post(`/returns/${boxId}/start-qa`);
+  return res.data;
+}
+
+export async function markRestocked(boxId: string) {
+  const res = await api.post(`/returns/${boxId}/restock`);
   return res.data;
 }

@@ -1,4 +1,4 @@
-import api from "./apiClient";
+import { api } from "./apiClient";
 export async function autoAssignTasks(): Promise<void> {
-  await api.post("/assign");
+  await api.post("/assign/auto");
 }

@@ -6,9 +6,14 @@ provider:
   runtime: nodejs18.x
   region: ca-central-1
   stage: ${opt:stage, 'dev'}
+  timeout: 30
+  apiGateway:
+    shouldStartNameWithService: true
   environment:
+    NODE_ENV: ${env:NODE_ENV, 'development'}
     STAGE: ${self:provider.stage}
     IS_OFFLINE: ${env:IS_OFFLINE, 'false'}
+    SIMULATOR_SHARED_SECRET: ${env:SIMULATOR_SHARED_SECRET}
     ORDERS_TABLE: ${self:service}-${self:provider.stage}-orders
     TASKS_TABLE: ${self:service}-${self:provider.stage}-tasks
     WORKERS_TABLE: ${self:service}-${self:provider.stage}-workers
@@ -33,6 +38,8 @@ plugins:
   - serverless-esbuild
   - serverless-dynamodb-local
   - serverless-offline
+  - serverless-dotenv-plugin
+
 
 custom:
   esbuild:

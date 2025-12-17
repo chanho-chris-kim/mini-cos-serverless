@@ -1,4 +1,4 @@
-import api from "./apiClient";
+import { api } from "./apiClient";
 import type { Task, TaskStatus } from "../lib/types";
 
 export async function fetchTasks(): Promise<Task[]> {

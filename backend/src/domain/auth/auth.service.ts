@@ -1,4 +1,6 @@
+// backend/src/domain/auth/auth.service.ts
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import { UserRepository } from "./user.repository";
 import type { PublicUser, AuthUser } from "./user.model";
 
@@ -21,9 +23,9 @@ export interface JwtClaims {
 }
 
 function toPublicUser(user: AuthUser): PublicUser {
-  // strip password
+  // strip passwordHash
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password, ...rest } = user;
+  const { passwordHash, ...rest } = user;
   return rest;
 }
 
@@ -31,13 +33,13 @@ export class AuthService {
   async login(email: string, password: string): Promise<LoginResult> {
     const user = await userRepo.findByEmail(email);
     if (!user) {
-      throw new Error("Invalid email or password");
+      throw new Error("Invalid credentials");
     }
 
-    // NOTE: For demo, plain-text comparison.
-    // In production, this should be bcrypt.compare(password, user.passwordHash)
-    if (user.password !== password) {
-      throw new Error("Invalid email or password");
+    // bcrypt password verification
+    const ok = await bcrypt.compare(password, user.passwordHash);
+    if (!ok) {
+      throw new Error("Invalid credentials");
     }
 
     const claims: JwtClaims = {

@@ -7,6 +7,11 @@ export default function Workers() {
   const { data: workers = [], isLoading } = useQuery({
     queryKey: ["workers"],
     queryFn: WorkersAPI.fetchWorkers,
+    refetchInterval: 2000,
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: true,
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   if (isLoading) return <div>Loading workers...</div>;

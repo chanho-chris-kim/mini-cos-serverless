@@ -30,4 +30,5 @@ export interface BoxEntity {
   trackingNumber?: string;
   returnCategory?: ReturnCategory;
   notes?: string;
+  reservedQty?: number;
 }

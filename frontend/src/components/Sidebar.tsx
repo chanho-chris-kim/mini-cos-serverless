@@ -8,6 +8,7 @@ const links = [
   { to: "/tasks", label: "Tasks" },
   { to: "/scan", label: "Scan" },
   { to: "/returns", label: "Returns" },
+  { to: "/returns-dashboard", label: "Returns Dashboard" },
   { to: "/warehouses", label: "Warehouses" },
   { to: "/workers", label: "Workers" },
   { to: "/analytics", label: "Analytics" },

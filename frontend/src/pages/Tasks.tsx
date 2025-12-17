@@ -10,6 +10,11 @@ export default function Tasks({ user }: { user: User | null }) {
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ["tasks"],
     queryFn: TasksAPI.fetchTasks,
+    refetchInterval: 2000,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   const assignMutation = useMutation({
@@ -19,8 +24,17 @@ export default function Tasks({ user }: { user: User | null }) {
 
   const visibleTasks =
     user?.role === "WORKER"
-      ? tasks.filter((t) => t.assignedTo === user.id)
+      ? tasks.filter((t) => t.workerId === user.id)
       : tasks;
+
+  const total = visibleTasks.length;
+  const pickCount = visibleTasks.filter((t) => t.type === "PICK").length;
+  const packCount = visibleTasks.filter((t) => t.type === "PACK").length;
+  const shipCount = visibleTasks.filter((t) => t.type === "SHIP").length;
+  const assignedToMe =
+    user?.role === "WORKER"
+      ? visibleTasks.filter((t) => t.workerId === user.id).length
+      : 0;
 
   if (isLoading) return <div>Loading tasks...</div>;
 
@@ -41,6 +55,18 @@ export default function Tasks({ user }: { user: User | null }) {
           >
             Auto Assign
           </button>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3 text-sm text-slate-600">
+        <div className="font-medium">Total tasks: {total}</div>
+        <div className="text-slate-500">
+          PICK: {pickCount} • PACK: {packCount} • SHIP: {shipCount}
+        </div>
+        {user?.role === "WORKER" && (
+          <span className="px-2 py-1 rounded-full bg-slate-200 text-slate-700 text-xs">
+            Assigned to you: {assignedToMe}
+          </span>
         )}
       </div>
 

@@ -11,6 +11,11 @@ export default function ReturnsPage() {
   const { data: boxes = [], isLoading, error } = useQuery({
     queryKey: ["returns"],
     queryFn: ReturnsAPI.fetchReturns,
+    refetchInterval: 2000,
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: true,
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   const classifyMutation = useMutation({

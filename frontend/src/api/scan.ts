@@ -1,4 +1,4 @@
-import api from "./apiClient";
+import { api } from "./apiClient";
 import type { BoxState } from "../lib/types";
 
 export async function scanBox(payload: {
