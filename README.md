@@ -196,6 +196,20 @@ Montreal, QC, Canada
 
 ---
 
-## 📄 License
+## 📄 License 
 
-MIT License
+This project is licensed under the **Creative Commons Attribution–NonCommercial–NoDerivatives 4.0 International (CC BY-NC-ND 4.0)** license.
+
+The repository is published **for portfolio and educational review purposes only**.
+
+You may:
+- View and review the source code
+- Clone and run the project locally for evaluation
+- Share the repository **unchanged** with attribution
+
+You may **not**:
+- Use this project or its code for commercial purposes
+- Modify and redistribute the code
+- Integrate this code into production or internal business systems
+
+For full terms, see the [`LICENSE`](./LICENSE) file.
