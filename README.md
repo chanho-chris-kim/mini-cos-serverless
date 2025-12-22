@@ -1,142 +1,198 @@
-# Mini-COS — Serverless Warehouse Operations Platform
+# Mini-COS — Warehouse Operations Platform (Serverless + React)
 
-Mini-COS is a **production-inspired, serverless warehouse operations system** designed to simulate how modern e-commerce companies manage orders, inventory, tasks, and fulfillment workflows at scale.
+Mini-COS is a **production-inspired warehouse operations system** that simulates how modern e-commerce companies manage **orders, inventory, tasks, workers, and fulfillment workflows** at scale.
 
-This project is intentionally built to mirror **real-world logistics platforms** (WMS / COS systems) with clean architecture, scalability, and extensibility in mind.
+It’s designed to resemble real internal WMS / COS tools: **clean architecture, strong domain boundaries, performance-minded UI**, and an API that can evolve toward **event-driven** workflows.
 
-> 🚧 **Status:** In active development — core domain architecture and services implemented, with additional features planned.
+> 🚧 **Status:** Active development — core domains, APIs, and UI scaffolding are implemented; more features and hardening are planned.
 
 ---
 
-## ✨ Key Features
+## ✨ Highlights
 
 - **Order lifecycle management**
-  - Receive and track customer orders
-  - Generate PICK → PACK → SHIP workflows
+  - Create / track orders and statuses
+  - Generate fulfillment workflows: **PICK → PACK → SHIP**
 - **Automated warehouse assignment**
-  - Assigns orders to the most suitable warehouse based on distance, capacity, and load
+  - Assigns orders to the best warehouse using distance + capacity/load signals
 - **Task orchestration**
-  - Creates and manages warehouse tasks across workers and locations
-- **Domain-driven design**
-  - Clear separation of Orders, Tasks, Warehouses, Workers, Inventory, Returns
-- **Serverless-first architecture**
-  - Designed for horizontal scalability and cost efficiency
-- **Extensible foundation**
-  - Built to support future AI routing, analytics, and event-driven workflows
+  - Create/assign tasks to workers and track execution
+- **Real-time warehouse events (SSE)**
+  - Stream operational events to the UI
+- **Role-based UI + auth foundation**
+  - Protected routes and role-aware navigation (UI)
+- **Domain-driven structure**
+  - Clear separation of Orders, Tasks, Warehouses, Workers, Customers, Inventory, Returns, Events, AI Assignment
+- **Serverless-ready backend**
+  - Built to scale horizontally and deploy via Serverless Framework (AWS)
 
 ---
 
-## 🧠 System Architecture
+## 🧠 Repository Structure
+
+This repo is a **monorepo** with a React frontend and a Serverless/TypeScript backend.
 
 ```
-mini-cos-serverless/
-├── src/
-│   ├── domain/
-│   │   ├── orders/
-│   │   ├── tasks/
-│   │   ├── warehouses/
-│   │   ├── workers/
-│   │   ├── inventory/
-│   │   ├── returns/
-│   │   └── ai/
-│   ├── events/
-│   ├── utils/
-│   ├── config/
-│   └── seed/
-├── serverless.yml
-├── package.json
+mini-cos/
+├── backend/                 # Serverless + TypeScript API (DDD-style domains)
+│   ├── serverless.yaml
+│   ├── src/
+│   │   ├── api/             # Controllers + routes
+│   │   ├── domain/          # Business domains (orders/tasks/warehouses/etc.)
+│   │   ├── lib/             # Dynamo + sync helpers
+│   │   ├── middleware/      # Auth + integration middleware
+│   │   ├── seed/            # Seed data (users, warehouses, workers, products)
+│   │   └── lambda.ts        # Lambda entry
+│   └── tests/               # Backend tests (Jest)
+├── frontend/                # React + Vite + TypeScript dashboard
+│   ├── src/
+│   │   ├── api/             # API client + typed endpoints
+│   │   ├── components/      # Reusable UI components (tables, kanban, layout)
+│   │   ├── hooks/           # Auth sync, SSE events, low-stock, etc.
+│   │   ├── pages/           # Dashboard pages (Orders/Tasks/Warehouses/etc.)
+│   │   └── simulator/       # Local sim engine + generators + UI
+│   └── vite.config.ts
+├── infra/                   # Infrastructure config (shared serverless.yml, etc.)
+├── shared/                  # Shared JSON/config artifacts
 └── README.md
 ```
 
-Each domain encapsulates:
-- Entities & models
-- Business rules
-- Services & workflows
-- Repository abstractions
+---
 
-This structure keeps business logic **framework-agnostic**, testable, and easy to evolve.
+## 🏗️ Backend Architecture (Serverless API)
+
+**Backend location:** `./backend`
+
+The backend follows **domain-driven organization**, where each domain encapsulates:
+- Models/entities
+- Services (business logic)
+- Repository contracts + Dynamo implementations (where applicable)
+
+Key areas:
+- `src/domain/orders` — order models, repositories, services
+- `src/domain/tasks` — task lifecycle and task services
+- `src/domain/warehouses` / `workers` / `customers` — operational entities
+- `src/domain/ai` — warehouse assignment logic (distance + load heuristics)
+- `src/domain/events` — event logging + SSE manager + event repositories
+- `src/api` — controllers + route definitions
+- `src/middleware` — auth, dev bypass, integrations/auth
 
 ---
 
-## 🛠️ Tech Stack
+## 🖥️ Frontend Architecture (React Dashboard)
 
-- **Runtime:** Node.js + TypeScript
-- **Architecture:** Serverless Framework
-- **API:** RESTful services
-- **Cloud (planned):**
-  - AWS Lambda
-  - API Gateway
-  - DynamoDB
-  - SQS / EventBridge
-- **Tooling:** ESLint, Prettier, GitHub
+**Frontend location:** `./frontend`
+
+The frontend is a **React + Vite + TypeScript** dashboard with:
+- Typed API clients in `src/api`
+- Shared UI components in `src/components` (tables, kanban, layout, topbar/sidebar)
+- Role-aware routing via `ProtectedRoute`
+- Hooks for:
+  - auth sync (`useAuthSync`)
+  - real-time updates via SSE (`useWarehouseEventsSSE`)
+  - low-stock insights (`useLowStock`)
+- A local simulator module (`src/simulator`) to generate realistic operational activity
+
+---
+
+## 🧰 Tech Stack
+
+**Frontend**
+- React + TypeScript + Vite
+- Tailwind CSS
+- Client-side routing + protected routes
+- SSE consumption for live updates
+
+**Backend**
+- Node.js + TypeScript
+- Serverless Framework
+- REST APIs (Express-style routing in Lambda)
+- DynamoDB integration (repositories)
+- Jest for tests
 
 ---
 
 ## 🔄 Core Workflows
 
-### Order Fulfillment
-1. Customer order is received
-2. Best warehouse is selected automatically
+### Fulfillment workflow
+1. Order is received/created
+2. Best warehouse is selected automatically (assignment service)
 3. PICK → PACK → SHIP tasks are generated
-4. Workers complete tasks, updating order status
+4. Workers complete tasks, updating task & order status
+5. Events are logged and streamed to the UI (SSE)
 
-### Warehouse Assignment Logic
-- Distance to customer
-- Active workload per warehouse
-- Worker availability
-- Inventory thresholds
-
----
-
-## 🧪 Development Status
-
-### Implemented
-- Core domain models and services
-- Warehouse assignment logic
-- Task lifecycle workflows
-- Seed data for simulation
-- Clean domain-driven structure
-
-### Planned
-- Authentication & role-based access
-- Frontend dashboard (React)
-- Event-driven task processing
-- Analytics & reporting
-- AI-assisted routing optimization
-- Automated tests
+### Warehouse assignment signals
+- Distance to customer (haversine)
+- Warehouse capacity and current load (active tasks)
+- Worker availability / operational constraints
+- Inventory thresholds (low-stock logic)
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Local)
 
+### Prerequisites
+- Node.js (LTS recommended)
+- npm
+
+### Install (root)
 ```bash
-git clone https://github.com/chanho-chris-kim/mini-cos-serverless.git
-cd mini-cos-serverless
 npm install
 ```
 
-Local execution and deployment steps will evolve as cloud integrations are finalized.
+### Run Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Run Backend (local)
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+> Note: Local backend run/deploy commands may evolve as AWS resources and environments are finalized.
 
 ---
 
-## 📌 Project Goals
+## 🧪 Tests
 
-- Simulate real-world warehouse operations
-- Demonstrate scalable backend architecture
-- Showcase clean domain-driven design
-- Serve as a portfolio-grade systems project
+### Backend
+```bash
+cd backend
+npm test
+```
+
+### Frontend
+```bash
+cd frontend
+npm test
+```
+
+---
+
+## 🗺️ Roadmap (Planned)
+
+- Harden auth + role-based permissions end-to-end
+- Expand E2E coverage (frontend + backend)
+- Event-driven processing (SQS / EventBridge) for task pipelines
+- Analytics dashboards (operational + seasonal insights)
+- AI-assisted routing optimization (more signals, constraints, explainability)
+- CI/CD automation for deploy + previews
 
 ---
 
 ## 👤 Author
 
 **Chanho Kim**  
-Front-End / Full-Stack Developer  
-📍 Montreal, Canada  
+Montreal, QC, Canada
 
-- Website: https://chanhokim.ca  
-- GitHub: https://github.com/chanho-chris-kim  
-- LinkedIn: https://linkedin.com/in/chanho-chris-kim  
+- Website: chanhokim.ca  
+- GitHub: github.com/chanho-chris-kim  
+- LinkedIn: linkedin.com/in/chanho-chris-kim
 
 ---
 
