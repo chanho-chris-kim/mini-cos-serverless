@@ -10,9 +10,11 @@ provider:
   apiGateway:
     shouldStartNameWithService: true
   environment:
-    NODE_ENV: ${env:NODE_ENV, 'development'}
+    NODE_ENV: ${env:NODE_ENV, self:provider.stage}
     STAGE: ${self:provider.stage}
     IS_OFFLINE: ${env:IS_OFFLINE, 'false'}
+    INTEGRATION_SHARED_SECRET: ${env:INTEGRATION_SHARED_SECRET}
+    JWT_SECRET: ${env:JWT_SECRET}
     SIMULATOR_SHARED_SECRET: ${env:SIMULATOR_SHARED_SECRET}
     ORDERS_TABLE: ${self:service}-${self:provider.stage}-orders
     TASKS_TABLE: ${self:service}-${self:provider.stage}-tasks

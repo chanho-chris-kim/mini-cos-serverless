@@ -7,7 +7,13 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "test": "jest",
     "deploy": "serverless deploy",
-    "offline": "serverless offline"
+    "offline": "serverless offline",
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:staging": "serverless deploy --stage staging",
+    "deploy:prod": "serverless deploy --stage prod",
+    "remove:dev": "serverless remove --stage dev",
+    "remove:staging": "serverless remove --stage staging",
+    "remove:prod": "serverless remove --stage prod"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.939.0",

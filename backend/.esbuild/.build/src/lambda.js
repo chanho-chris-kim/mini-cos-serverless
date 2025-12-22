@@ -5,6 +5,9 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
@@ -24228,6 +24231,1336 @@ var require_lib3 = __commonJS({
   }
 });
 
+// src/domain/orders/order.repository.ts
+var orders, OrderRepository;
+var init_order_repository = __esm({
+  "src/domain/orders/order.repository.ts"() {
+    "use strict";
+    init_sharedRepos();
+    orders = [];
+    OrderRepository = class {
+      listOrders() {
+        return orders;
+      }
+      findById(id) {
+        return orders.find((o) => o.id === id) || null;
+      }
+      saveOrder(order) {
+        const idx = orders.findIndex((o) => o.id === order.id);
+        if (idx === -1) orders.push(order);
+        else orders[idx] = order;
+      }
+      updateOrder(order) {
+        this.saveOrder(order);
+      }
+      createOrder(data) {
+        const id = data.id ?? `O-${Date.now()}`;
+        const newOrder = {
+          id,
+          customerId: data.customerId ?? `C-${Date.now()}`,
+          customerName: data.customerName ?? "Simulated Customer",
+          createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+          destination: data.destination,
+          status: "PENDING",
+          routes: data.routes ?? {},
+          boxes: data.boxes ?? []
+        };
+        orders.push(newOrder);
+        return newOrder;
+      }
+      listBoxes() {
+        return orders.flatMap((o) => o.boxes);
+      }
+      findOrderByBoxId(boxId) {
+        return orders.find((o) => o.boxes.some((b) => b.id === boxId)) || null;
+      }
+      getBox(boxId) {
+        for (const order of orders) {
+          const box = order.boxes.find((b) => b.id === boxId);
+          if (box) return box;
+        }
+        return null;
+      }
+      updateBoxState(boxId, newState) {
+        for (const order of orders) {
+          const box = order.boxes.find((b) => b.id === boxId);
+          if (box) {
+            box.state = newState;
+            return box;
+          }
+        }
+        return null;
+      }
+      classifyReturn(boxId, category, notes) {
+        for (const order of orders) {
+          const box = order.boxes.find((b) => b.id === boxId);
+          if (box) {
+            box.returnCategory = category;
+            box.returnNotes = notes;
+            box.state = "QA_DONE";
+            return box;
+          }
+        }
+        return null;
+      }
+      async recomputeOrderStatus(orderId) {
+        const order = this.findById(orderId);
+        if (!order) throw new Error("Order not found");
+        const tasks2 = await taskRepo.listTasks();
+        const shipTasks = tasks2.filter((t) => t.orderId === orderId && t.type === "SHIP");
+        const allShipDone = shipTasks.length > 0 && shipTasks.every((t) => t.status === "DONE");
+        console.log(
+          "[ORDER STATUS CHECK]",
+          order.id,
+          "SHIP tasks:",
+          shipTasks.map((t) => t.status)
+        );
+        if (allShipDone) {
+          order.status = "FULFILLED";
+        } else {
+          order.status = "IN_PROGRESS";
+        }
+        this.saveOrder(order);
+        return order.status;
+      }
+      seedIfEmpty(defaults = []) {
+        if (orders.length === 0) orders = [...defaults];
+      }
+    };
+  }
+});
+
+// src/domain/tasks/task.repository.ts
+var tasks, TaskRepository;
+var init_task_repository = __esm({
+  "src/domain/tasks/task.repository.ts"() {
+    "use strict";
+    init_sharedRepos();
+    tasks = [];
+    TaskRepository = class {
+      // Always return a fresh array so callers can't mutate the internal store by accident
+      async listTasks() {
+        return [...tasks];
+      }
+      async countActiveTasksForWarehouse(warehouseId) {
+        return tasks.filter(
+          (t) => t.warehouseId === warehouseId && t.status !== "DONE"
+        ).length;
+      }
+      async listTasksForWorker(workerId) {
+        return tasks.filter((t) => t.workerId === workerId);
+      }
+      async getTask(taskId) {
+        return tasks.find((t) => t.id === taskId) ?? null;
+      }
+      async saveTask(task) {
+        const idx = tasks.findIndex((t) => t.id === task.id);
+        if (idx === -1) {
+          tasks.push(task);
+        } else {
+          tasks[idx] = task;
+        }
+      }
+      async createTask(task) {
+        await this.saveTask(task);
+        return task;
+      }
+      async upsertMany(newTasks) {
+        for (const t of newTasks) {
+          const idx = tasks.findIndex((x) => x.id === t.id);
+          if (idx === -1) tasks.push(t);
+          else tasks[idx] = t;
+        }
+      }
+      async updateTaskStatus(taskId, newStatus) {
+        return this.updateStatus(taskId, newStatus);
+      }
+      async updateStatus(taskId, newStatus) {
+        const task = await this.getTask(taskId);
+        if (!task) throw new Error("Task not found");
+        const prevStatus = task.status;
+        task.status = newStatus;
+        await this.saveTask(task);
+        await this.updateBoxStateForTask(task, newStatus);
+        return task;
+      }
+      async assignWorker(taskId, workerId) {
+        const task = await this.getTask(taskId);
+        if (!task) throw new Error("Task not found");
+        task.workerId = workerId;
+        if (task.status === "PENDING_PICK") {
+          return this.updateStatus(task.id, "IN_PROGRESS");
+        }
+        await this.saveTask(task);
+        return task;
+      }
+      seedIfEmpty(defaults = []) {
+        if (!Array.isArray(defaults)) return;
+        if (tasks.length === 0 && defaults.length) {
+          tasks = [...defaults];
+        }
+      }
+      // Optional helper for analytics / debugging
+      async countByStatus() {
+        const result = {};
+        for (const t of tasks) {
+          result[t.status] = (result[t.status] ?? 0) + 1;
+        }
+        return result;
+      }
+      async updateBoxStateForTask(task, status) {
+        const order = orderRepo.findById(task.orderId);
+        if (!order) return;
+        const box = order.boxes.find((b) => b.id === task.boxId);
+        if (!box) return;
+        console.log("[TASK STATUS]", task.id, task.type, "\u2192", status, "for box", task.boxId);
+        if (status === "IN_PROGRESS") {
+          box.state = "PICK_ASSIGNED";
+        } else if (status === "DONE") {
+          if (task.type === "PICK" || !task.type) box.state = "PICKED";
+          else if (task.type === "PACK") box.state = "PACKED";
+          else if (task.type === "SHIP") box.state = "OUTBOUND";
+        }
+        orderRepo.saveOrder(order);
+        await orderRepo.recomputeOrderStatus(order.id);
+        const tasksForBox = tasks.filter(
+          (t) => t.orderId === task.orderId && t.boxId === task.boxId
+        );
+        if (task.type === "PICK" && status === "DONE") {
+          const next = tasksForBox.find(
+            (t) => t.type === "PACK" && t.status === "PENDING"
+          );
+          if (next) {
+            next.status = "PENDING_PICK";
+            this.saveTask(next);
+          }
+        } else if (task.type === "PACK" && status === "DONE") {
+          const next = tasksForBox.find(
+            (t) => t.type === "SHIP" && t.status === "PENDING"
+          );
+          if (next) {
+            next.status = "PENDING_PICK";
+            this.saveTask(next);
+          }
+        } else if (task.type === "SHIP" && status === "DONE") {
+          const order2 = orderRepo.findById(task.orderId);
+          if (order2) {
+            const b = order2.boxes.find((bx) => bx.id === task.boxId);
+            if (b) b.state = "DELIVERED";
+            orderRepo.saveOrder(order2);
+            await orderRepo.recomputeOrderStatus(order2.id);
+          }
+        }
+        console.log("[BOX STATE]", box.id, "now", box.state);
+      }
+      updateInventoryForTask(_task, _prevStatus, _newStatus) {
+      }
+    };
+  }
+});
+
+// src/domain/workers/worker.repository.ts
+var workers, WorkerRepository;
+var init_worker_repository = __esm({
+  "src/domain/workers/worker.repository.ts"() {
+    "use strict";
+    workers = [];
+    WorkerRepository = class {
+      constructor() {
+        this.rrCursors = {};
+      }
+      listWorkers() {
+        return workers;
+      }
+      listByWarehouse(warehouseId) {
+        return workers.filter((w) => w.warehouseId === warehouseId);
+      }
+      getWorkersByWarehouse(warehouseId) {
+        return this.listByWarehouse(warehouseId);
+      }
+      listByRole(role) {
+        return workers.filter((w) => w.role === role);
+      }
+      findById(id) {
+        return workers.find((w) => w.id === id) || null;
+      }
+      save(worker) {
+        worker.currentLoad = worker.currentLoad ?? worker.currentTasks ?? 0;
+        worker.currentTasks = worker.currentLoad;
+        worker.capacity = worker.capacity ?? worker.maxTasks ?? 0;
+        worker.maxTasks = worker.capacity;
+        worker.active = worker.active ?? true;
+        worker.lastAssignedAt = worker.lastAssignedAt ?? 0;
+        const idx = workers.findIndex((w) => w.id === worker.id);
+        if (idx === -1) workers.push(worker);
+        else workers[idx] = { ...workers[idx], ...worker };
+      }
+      assignTask(workerId, taskId) {
+        const worker = this.findById(workerId);
+        if (!worker) return;
+        worker.activeTaskIds = worker.activeTaskIds ?? [];
+        if (!worker.activeTaskIds.includes(taskId)) {
+          worker.activeTaskIds.push(taskId);
+        }
+        worker.currentLoad = worker.currentLoad ?? 0;
+        worker.currentTasks = worker.currentLoad;
+        this.save(worker);
+      }
+      seedIfEmpty(defaults = []) {
+        if (!Array.isArray(defaults)) return;
+        if (workers.length === 0) {
+          workers = [...defaults];
+        }
+      }
+      updateWorkerLoad(workerId, delta) {
+        const worker = this.findById(workerId);
+        if (worker) {
+          worker.currentLoad = (worker.currentLoad ?? 0) + delta;
+          if (worker.currentLoad < 0) worker.currentLoad = 0;
+          worker.currentTasks = worker.currentLoad;
+          this.save(worker);
+        }
+      }
+      getAvailableWorkers(warehouseId) {
+        return workers.filter(
+          (w) => w.warehouseId === warehouseId && w.active && (w.capacity ?? w.maxTasks ?? 0) > (w.currentLoad ?? 0)
+        ).sort((a, b) => {
+          const loadA = a.currentLoad ?? 0;
+          const loadB = b.currentLoad ?? 0;
+          if (loadA !== loadB) return loadA - loadB;
+          return (a.lastAssignedAt ?? 0) - (b.lastAssignedAt ?? 0);
+        });
+      }
+      pickNextWorkerForTask(warehouseId, taskType) {
+        const zone = taskType === "PICK" ? "PICKING" : taskType === "PACK" ? "PACKING" : "SHIPPING";
+        const eligible = workers.filter(
+          (w) => w.warehouseId === warehouseId && w.active !== false && w.zone === zone && (w.capacity ?? w.maxTasks ?? 0) > (w.currentLoad ?? w.currentTasks ?? 0)
+        );
+        if (eligible.length === 0) return null;
+        const key = `${warehouseId}:${zone}`;
+        const cursor = this.rrCursors[key] ?? 0;
+        const idx = cursor % eligible.length;
+        const chosen = eligible[idx];
+        this.rrCursors[key] = (idx + 1) % eligible.length;
+        chosen.lastAssignedAt = Date.now();
+        this.updateWorkerLoad(chosen.id, 1);
+        this.save(chosen);
+        return chosen;
+      }
+    };
+  }
+});
+
+// src/config/inventoryThresholds.ts
+var LOW_STOCK_THRESHOLD;
+var init_inventoryThresholds = __esm({
+  "src/config/inventoryThresholds.ts"() {
+    "use strict";
+    LOW_STOCK_THRESHOLD = 3;
+  }
+});
+
+// src/domain/events/warehouseEvents.repository.ts
+var WarehouseEventsRepository, warehouseEventsRepo;
+var init_warehouseEvents_repository = __esm({
+  "src/domain/events/warehouseEvents.repository.ts"() {
+    "use strict";
+    WarehouseEventsRepository = class {
+      constructor() {
+        this.events = [];
+      }
+      addEvent(event) {
+        this.events.push(event);
+      }
+      getEventsForWarehouse(warehouseId, limit = 50) {
+        const filtered = warehouseId === "ALL" ? this.events : this.events.filter((e) => e.warehouseId === warehouseId);
+        return filtered.slice().sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limit);
+      }
+    };
+    warehouseEventsRepo = new WarehouseEventsRepository();
+  }
+});
+
+// src/domain/events/sseManager.ts
+var SSEManager, sseManager;
+var init_sseManager = __esm({
+  "src/domain/events/sseManager.ts"() {
+    "use strict";
+    SSEManager = class {
+      constructor() {
+        this.clients = /* @__PURE__ */ new Map();
+        this.globalClients = /* @__PURE__ */ new Set();
+      }
+      addClient(warehouseId, res, origin) {
+        res.writeHead(200, {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+          "Access-Control-Allow-Origin": origin || "*",
+          "Access-Control-Allow-Credentials": "true",
+          Vary: "Origin"
+        });
+        if (warehouseId === "ALL") {
+          this.globalClients.add(res);
+        } else {
+          if (!this.clients.has(warehouseId)) {
+            this.clients.set(warehouseId, /* @__PURE__ */ new Set());
+          }
+          this.clients.get(warehouseId).add(res);
+        }
+        res.write("event: ping\ndata: connected\n\n");
+      }
+      removeClient(warehouseId, res) {
+        if (warehouseId === "ALL") {
+          this.globalClients.delete(res);
+        } else {
+          this.clients.get(warehouseId)?.delete(res);
+        }
+      }
+      send(res, event) {
+        try {
+          res.write(`data: ${JSON.stringify(event)}
+
+`);
+        } catch (err) {
+        }
+      }
+      broadcastTo(warehouseId, event) {
+        this.clients.get(warehouseId)?.forEach((res) => this.send(res, event));
+      }
+      broadcastGlobal(event) {
+        this.globalClients.forEach((res) => this.send(res, event));
+      }
+    };
+    sseManager = new SSEManager();
+  }
+});
+
+// src/domain/events/eventLogger.service.ts
+function setWarehouseEventsRepo(repo) {
+  eventsRepo = repo;
+}
+var import_crypto, eventsRepo, EventLogger, eventLogger;
+var init_eventLogger_service = __esm({
+  "src/domain/events/eventLogger.service.ts"() {
+    "use strict";
+    import_crypto = require("crypto");
+    init_warehouseEvents_repository();
+    init_sseManager();
+    eventsRepo = warehouseEventsRepo;
+    EventLogger = class {
+      log(warehouseId, type, message, meta) {
+        const event = {
+          id: (0, import_crypto.randomUUID)(),
+          warehouseId,
+          type,
+          message,
+          timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+          meta: meta ?? void 0
+        };
+        eventsRepo.addEvent(event);
+        sseManager.broadcastTo(warehouseId, event);
+        sseManager.broadcastGlobal(event);
+      }
+      logReturnReceived(warehouseId, boxId) {
+        this.log(warehouseId, "RETURN_RECEIVED", `Return received at ${warehouseId} (${boxId})`, {
+          boxId
+        });
+      }
+      logReturnQAStart(warehouseId, boxId) {
+        this.log(warehouseId, "RETURN_QA_STARTED", `QA started for ${boxId}`, { boxId });
+      }
+      logReturnClassified(warehouseId, boxId, category) {
+        this.log(
+          warehouseId,
+          "RETURN_CLASSIFIED",
+          `QA classified ${boxId}: ${category}`,
+          { boxId, category }
+        );
+      }
+    };
+    eventLogger = new EventLogger();
+  }
+});
+
+// src/domain/warehouses/warehouse.repository.ts
+var warehouses, WarehouseRepository;
+var init_warehouse_repository = __esm({
+  "src/domain/warehouses/warehouse.repository.ts"() {
+    "use strict";
+    init_inventoryThresholds();
+    init_eventLogger_service();
+    warehouses = [];
+    WarehouseRepository = class {
+      /**
+       * Preferred API: return all warehouses.
+       */
+      listWarehouses() {
+        return warehouses;
+      }
+      /**
+       * Backwards-compatible alias: some services still call repo.list()
+       */
+      list() {
+        return this.listWarehouses();
+      }
+      findById(id) {
+        return warehouses.find((w) => w.id === id) || null;
+      }
+      save(warehouse) {
+        const idx = warehouses.findIndex((w) => w.id === warehouse.id);
+        if (idx === -1) warehouses.push(warehouse);
+        else warehouses[idx] = warehouse;
+      }
+      seedIfEmpty(defaults = []) {
+        if (!Array.isArray(defaults)) return;
+        if (warehouses.length === 0 && defaults.length) {
+          warehouses = [...defaults];
+        }
+      }
+      // Convenience getters/setters used elsewhere
+      getWarehouse(id) {
+        return this.findById(id);
+      }
+      saveWarehouse(warehouse) {
+        this.save(warehouse);
+      }
+      decrementInventory(warehouseId, sku) {
+        const wh = this.findById(warehouseId);
+        if (!wh) return;
+        const current = wh.inventory[sku] ?? 0;
+        wh.inventory[sku] = Math.max(0, current - 1);
+        if (wh.inventory[sku] <= LOW_STOCK_THRESHOLD) {
+          console.warn(`[LOW STOCK] WH ${warehouseId} SKU ${sku} -> qty ${wh.inventory[sku]}`);
+        }
+        this.save(wh);
+        eventLogger.log(
+          warehouseId,
+          "INVENTORY_DECREASED",
+          `Inventory decreased for ${sku} -> ${wh.inventory[sku]}`,
+          { sku, quantity: wh.inventory[sku] }
+        );
+      }
+      incrementInventory(warehouseId, sku) {
+        const wh = this.findById(warehouseId);
+        if (!wh) return;
+        const current = wh.inventory[sku] ?? 0;
+        wh.inventory[sku] = current + 1;
+        this.save(wh);
+        eventLogger.log(
+          warehouseId,
+          "INVENTORY_INCREASED",
+          `Inventory increased for ${sku} -> ${wh.inventory[sku]}`,
+          { sku, quantity: wh.inventory[sku] }
+        );
+      }
+      getLowStock(threshold = LOW_STOCK_THRESHOLD) {
+        const results = [];
+        for (const wh of warehouses) {
+          for (const [sku, qty] of Object.entries(wh.inventory ?? {})) {
+            if (qty <= threshold) {
+              results.push({ warehouseId: wh.id, sku, quantity: qty });
+            }
+          }
+        }
+        return results;
+      }
+      async getInventoryForWarehouse(warehouseId) {
+        const wh = this.findById(warehouseId);
+        if (!wh) return [];
+        const heuristicReorderPoint = (stock) => Math.min(5, Math.max(1, Math.floor(stock / 10)));
+        const items = [];
+        for (const [sku, qty] of Object.entries(wh.inventory ?? {})) {
+          const reorderPoint = heuristicReorderPoint(qty);
+          items.push({
+            sku,
+            warehouseId,
+            currentStock: qty,
+            reorderPoint,
+            capacity: void 0,
+            lowStock: qty <= (reorderPoint ?? LOW_STOCK_THRESHOLD)
+          });
+        }
+        return items;
+      }
+    };
+  }
+});
+
+// src/domain/backorders/backorder.repository.ts
+var backorders, BackorderRepository;
+var init_backorder_repository = __esm({
+  "src/domain/backorders/backorder.repository.ts"() {
+    "use strict";
+    backorders = [];
+    BackorderRepository = class {
+      add(item) {
+        backorders.push(item);
+      }
+      listAll() {
+        return [...backorders];
+      }
+      listByWarehouse(warehouseId) {
+        if (warehouseId === "ALL") return [...backorders];
+        return backorders.filter((b) => b.warehouseId === warehouseId);
+      }
+      listOpen() {
+        return backorders.filter((b) => b.status === "OPEN" || b.status === "PARTIAL");
+      }
+      listOpenByWarehouse(warehouseId) {
+        const open = this.listOpen();
+        if (warehouseId === "ALL") return open;
+        return open.filter((b) => b.warehouseId === warehouseId);
+      }
+    };
+  }
+});
+
+// src/domain/customers/customer.repository.ts
+var customers, CustomerRepository;
+var init_customer_repository = __esm({
+  "src/domain/customers/customer.repository.ts"() {
+    "use strict";
+    customers = [];
+    CustomerRepository = class {
+      listCustomers() {
+        return customers;
+      }
+      getAll() {
+        return this.listCustomers();
+      }
+      getCustomer(id) {
+        return customers.find((c) => c.id === id) || null;
+      }
+      saveCustomer(customer) {
+        const existing = this.getCustomer(customer.id);
+        if (existing) {
+          Object.assign(existing, customer);
+        } else {
+          customers.push(customer);
+        }
+      }
+      updateDeliveryAddress(id, address) {
+        const customer = this.getCustomer(id);
+        if (!customer) return;
+        customer.deliveryAddress = address;
+        this.saveCustomer(customer);
+      }
+      updateHomeAddress(id, address) {
+        const customer = this.getCustomer(id);
+        if (!customer) return;
+        customer.homeAddress = address;
+        this.saveCustomer(customer);
+      }
+      seedIfEmpty(defaults = []) {
+        if (customers.length === 0) customers = [...defaults];
+      }
+    };
+  }
+});
+
+// src/lib/dynamo.ts
+var import_client_dynamodb, import_lib_dynamodb, isOffline, localClient, awsClient, dynamo;
+var init_dynamo = __esm({
+  "src/lib/dynamo.ts"() {
+    "use strict";
+    import_client_dynamodb = require("@aws-sdk/client-dynamodb");
+    import_lib_dynamodb = require("@aws-sdk/lib-dynamodb");
+    isOffline = process.env.IS_OFFLINE === "true";
+    localClient = new import_client_dynamodb.DynamoDBClient({
+      region: "ca-central-1",
+      endpoint: "http://localhost:8000",
+      credentials: {
+        accessKeyId: "fake",
+        secretAccessKey: "fake"
+      }
+    });
+    awsClient = new import_client_dynamodb.DynamoDBClient({
+      region: process.env.AWS_REGION || "ca-central-1"
+    });
+    dynamo = import_lib_dynamodb.DynamoDBDocumentClient.from(
+      isOffline ? localClient : awsClient,
+      {
+        marshallOptions: {
+          removeUndefinedValues: true
+        }
+      }
+    );
+  }
+});
+
+// src/lib/sync.ts
+function waitForPromise(promise) {
+  const flag = new Int32Array(new SharedArrayBuffer(4));
+  let result;
+  let error;
+  promise.then((value) => {
+    result = value;
+    Atomics.store(flag, 0, 1);
+    Atomics.notify(flag, 0);
+  }).catch((err) => {
+    error = err;
+    Atomics.store(flag, 0, 1);
+    Atomics.notify(flag, 0);
+  });
+  if (Atomics.load(flag, 0) === 0) {
+    Atomics.wait(flag, 0, 0);
+  }
+  if (error) throw error;
+  return result;
+}
+var init_sync = __esm({
+  "src/lib/sync.ts"() {
+    "use strict";
+  }
+});
+
+// src/domain/orders/order.dynamo.repository.ts
+var import_lib_dynamodb2, getTaskRepo, DEFAULT_TABLE, DynamoOrderRepo;
+var init_order_dynamo_repository = __esm({
+  "src/domain/orders/order.dynamo.repository.ts"() {
+    "use strict";
+    import_lib_dynamodb2 = require("@aws-sdk/lib-dynamodb");
+    init_dynamo();
+    init_sync();
+    getTaskRepo = () => {
+      const { taskRepo: taskRepo3 } = (init_sharedRepos(), __toCommonJS(sharedRepos_exports));
+      return taskRepo3;
+    };
+    DEFAULT_TABLE = "MiniCosOrders";
+    DynamoOrderRepo = class {
+      constructor() {
+        this.tableName = process.env.ORDERS_TABLE || DEFAULT_TABLE;
+      }
+      listOrders() {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb2.ScanCommand({ TableName: this.tableName }))
+        );
+        return res.Items ?? [];
+      }
+      findById(id) {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb2.GetCommand({ TableName: this.tableName, Key: { id } }))
+        );
+        return res.Item ?? null;
+      }
+      saveOrder(order) {
+        waitForPromise(
+          dynamo.send(new import_lib_dynamodb2.PutCommand({ TableName: this.tableName, Item: order }))
+        );
+      }
+      updateOrder(order) {
+        this.saveOrder(order);
+      }
+      createOrder(data) {
+        const id = data.id ?? `O-${Date.now()}`;
+        const newOrder = {
+          id,
+          customerId: data.customerId ?? `C-${Date.now()}`,
+          customerName: data.customerName ?? "Simulated Customer",
+          createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+          destination: data.destination,
+          status: "PENDING",
+          routes: data.routes ?? {},
+          boxes: data.boxes ?? []
+        };
+        this.saveOrder(newOrder);
+        return newOrder;
+      }
+      listBoxes() {
+        return this.listOrders().flatMap((o) => o.boxes ?? []);
+      }
+      findOrderByBoxId(boxId) {
+        return this.listOrders().find((o) => o.boxes.some((b) => b.id === boxId)) ?? null;
+      }
+      getBox(boxId) {
+        for (const order of this.listOrders()) {
+          const box = order.boxes.find((b) => b.id === boxId);
+          if (box) return box;
+        }
+        return null;
+      }
+      updateBoxState(boxId, newState) {
+        const order = this.findOrderByBoxId(boxId);
+        if (!order) return null;
+        const box = order.boxes.find((b) => b.id === boxId);
+        if (!box) return null;
+        box.state = newState;
+        this.saveOrder(order);
+        return box;
+      }
+      classifyReturn(boxId, category, notes) {
+        const order = this.findOrderByBoxId(boxId);
+        if (!order) return null;
+        const box = order.boxes.find((b) => b.id === boxId);
+        if (!box) return null;
+        box.returnCategory = category;
+        box.returnNotes = notes;
+        box.state = "QA_DONE";
+        this.saveOrder(order);
+        return box;
+      }
+      async recomputeOrderStatus(orderId) {
+        const order = this.findById(orderId);
+        if (!order) throw new Error("Order not found");
+        const tasks2 = await getTaskRepo().listTasks();
+        const shipTasks = tasks2.filter((t) => t.orderId === orderId && t.type === "SHIP");
+        const allShipDone = shipTasks.length > 0 && shipTasks.every((t) => t.status === "DONE");
+        if (allShipDone) {
+          order.status = "FULFILLED";
+        } else {
+          order.status = "IN_PROGRESS";
+        }
+        this.saveOrder(order);
+        return order.status;
+      }
+      seedIfEmpty(defaults = []) {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb2.ScanCommand({ TableName: this.tableName, Limit: 1 }))
+        );
+        if ((res.Items?.length ?? 0) === 0 && defaults.length > 0) {
+          defaults.forEach((order) => this.saveOrder(order));
+        }
+      }
+    };
+  }
+});
+
+// src/domain/tasks/task.dynamo.repository.ts
+var import_lib_dynamodb3, getOrderRepo, DEFAULT_TABLE2, DynamoTaskRepo;
+var init_task_dynamo_repository = __esm({
+  "src/domain/tasks/task.dynamo.repository.ts"() {
+    "use strict";
+    import_lib_dynamodb3 = require("@aws-sdk/lib-dynamodb");
+    init_dynamo();
+    init_sync();
+    getOrderRepo = () => {
+      const { orderRepo: orderRepo2 } = (init_sharedRepos(), __toCommonJS(sharedRepos_exports));
+      return orderRepo2;
+    };
+    DEFAULT_TABLE2 = "MiniCosTasks";
+    DynamoTaskRepo = class {
+      constructor() {
+        this.tableName = process.env.TASKS_TABLE || DEFAULT_TABLE2;
+      }
+      async listTasks() {
+        const res = await dynamo.send(new import_lib_dynamodb3.ScanCommand({ TableName: this.tableName }));
+        return res.Items ?? [];
+      }
+      async countActiveTasksForWarehouse(warehouseId) {
+        const tasks2 = await this.listTasks();
+        return tasks2.filter((t) => t.warehouseId === warehouseId && t.status !== "DONE").length;
+      }
+      async listTasksForWorker(workerId) {
+        const tasks2 = await this.listTasks();
+        return tasks2.filter((t) => t.workerId === workerId);
+      }
+      async getTask(taskId) {
+        const res = await dynamo.send(
+          new import_lib_dynamodb3.GetCommand({ TableName: this.tableName, Key: { id: taskId } })
+        );
+        return res.Item ?? null;
+      }
+      async saveTask(task) {
+        await dynamo.send(new import_lib_dynamodb3.PutCommand({ TableName: this.tableName, Item: task }));
+      }
+      async createTask(task) {
+        await this.saveTask(task);
+        return task;
+      }
+      async upsertMany(newTasks) {
+        for (const t of newTasks) {
+          await this.saveTask(t);
+        }
+      }
+      async updateTaskStatus(taskId, newStatus) {
+        return this.updateStatus(taskId, newStatus);
+      }
+      async updateStatus(taskId, newStatus) {
+        const task = await this.getTask(taskId);
+        if (!task) throw new Error("Task not found");
+        task.status = newStatus;
+        await this.saveTask(task);
+        await this.updateBoxStateForTask(task, newStatus);
+        return task;
+      }
+      async assignWorker(taskId, workerId) {
+        const task = await this.getTask(taskId);
+        if (!task) throw new Error("Task not found");
+        task.workerId = workerId;
+        if (task.status === "PENDING_PICK") {
+          return this.updateStatus(task.id, "IN_PROGRESS");
+        }
+        await this.saveTask(task);
+        return task;
+      }
+      seedIfEmpty(defaults = []) {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb3.ScanCommand({ TableName: this.tableName, Limit: 1 }))
+        );
+        if ((res.Items?.length ?? 0) === 0 && defaults.length > 0) {
+          defaults.forEach(
+            (t) => waitForPromise(dynamo.send(new import_lib_dynamodb3.PutCommand({ TableName: this.tableName, Item: t })))
+          );
+        }
+      }
+      async countByStatus() {
+        const tasks2 = await this.listTasks();
+        const result = {};
+        for (const t of tasks2) {
+          result[t.status] = (result[t.status] ?? 0) + 1;
+        }
+        return result;
+      }
+      async updateBoxStateForTask(task, status) {
+        const order = getOrderRepo().findById(task.orderId);
+        if (!order) return;
+        const box = order.boxes.find((b) => b.id === task.boxId);
+        if (!box) return;
+        if (status === "IN_PROGRESS") {
+          box.state = "PICK_ASSIGNED";
+        } else if (status === "DONE") {
+          if (task.type === "PICK" || !task.type) box.state = "PICKED";
+          else if (task.type === "PACK") box.state = "PACKED";
+          else if (task.type === "SHIP") box.state = "OUTBOUND";
+        }
+        getOrderRepo().saveOrder(order);
+        await getOrderRepo().recomputeOrderStatus(order.id);
+        const tasksForBox = (await this.listTasks()).filter(
+          (t) => t.orderId === task.orderId && t.boxId === task.boxId
+        );
+        if (task.type === "PICK" && status === "DONE") {
+          const next = tasksForBox.find(
+            (t) => t.type === "PACK" && t.status === "PENDING"
+          );
+          if (next) {
+            next.status = "PENDING_PICK";
+            await this.saveTask(next);
+          }
+        } else if (task.type === "PACK" && status === "DONE") {
+          const next = tasksForBox.find(
+            (t) => t.type === "SHIP" && t.status === "PENDING"
+          );
+          if (next) {
+            next.status = "PENDING_PICK";
+            await this.saveTask(next);
+          }
+        } else if (task.type === "SHIP" && status === "DONE") {
+          const order2 = getOrderRepo().findById(task.orderId);
+          if (order2) {
+            const b = order2.boxes.find((bx) => bx.id === task.boxId);
+            if (b) b.state = "DELIVERED";
+            getOrderRepo().saveOrder(order2);
+            await getOrderRepo().recomputeOrderStatus(order2.id);
+          }
+        }
+      }
+    };
+  }
+});
+
+// src/domain/workers/worker.dynamo.repository.ts
+var import_lib_dynamodb4, DEFAULT_TABLE3, DynamoWorkerRepo;
+var init_worker_dynamo_repository = __esm({
+  "src/domain/workers/worker.dynamo.repository.ts"() {
+    "use strict";
+    import_lib_dynamodb4 = require("@aws-sdk/lib-dynamodb");
+    init_dynamo();
+    init_sync();
+    DEFAULT_TABLE3 = "MiniCosWorkers";
+    DynamoWorkerRepo = class {
+      constructor() {
+        this.tableName = process.env.WORKERS_TABLE || DEFAULT_TABLE3;
+        this.rrCursors = {};
+      }
+      listWorkers() {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb4.ScanCommand({ TableName: this.tableName }))
+        );
+        return res.Items ?? [];
+      }
+      listByWarehouse(warehouseId) {
+        return this.listWorkers().filter((w) => w.warehouseId === warehouseId);
+      }
+      getWorkersByWarehouse(warehouseId) {
+        return this.listByWarehouse(warehouseId);
+      }
+      listByRole(role) {
+        return this.listWorkers().filter((w) => w.role === role);
+      }
+      findById(id) {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb4.GetCommand({ TableName: this.tableName, Key: { id } }))
+        );
+        return res.Item ?? null;
+      }
+      save(worker) {
+        worker.currentLoad = worker.currentLoad ?? worker.currentTasks ?? 0;
+        worker.currentTasks = worker.currentLoad;
+        worker.capacity = worker.capacity ?? worker.maxTasks ?? 0;
+        worker.maxTasks = worker.capacity;
+        worker.active = worker.active ?? true;
+        worker.lastAssignedAt = worker.lastAssignedAt ?? 0;
+        waitForPromise(
+          dynamo.send(new import_lib_dynamodb4.PutCommand({ TableName: this.tableName, Item: worker }))
+        );
+      }
+      assignTask(workerId, taskId) {
+        const worker = this.findById(workerId);
+        if (!worker) return;
+        worker.activeTaskIds = worker.activeTaskIds ?? [];
+        if (!worker.activeTaskIds.includes(taskId)) {
+          worker.activeTaskIds.push(taskId);
+        }
+        worker.currentLoad = worker.currentLoad ?? 0;
+        worker.currentTasks = worker.currentLoad;
+        this.save(worker);
+      }
+      seedIfEmpty(defaults = []) {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb4.ScanCommand({ TableName: this.tableName, Limit: 1 }))
+        );
+        if ((res.Items?.length ?? 0) === 0 && defaults.length > 0) {
+          defaults.forEach((w) => this.save(w));
+        }
+      }
+      updateWorkerLoad(workerId, delta) {
+        const worker = this.findById(workerId);
+        if (worker) {
+          worker.currentLoad = (worker.currentLoad ?? 0) + delta;
+          if (worker.currentLoad < 0) worker.currentLoad = 0;
+          worker.currentTasks = worker.currentLoad;
+          this.save(worker);
+        }
+      }
+      getAvailableWorkers(warehouseId) {
+        return this.listWorkers().filter(
+          (w) => w.warehouseId === warehouseId && w.active && (w.capacity ?? w.maxTasks ?? 0) > (w.currentLoad ?? 0)
+        ).sort((a, b) => {
+          const loadA = a.currentLoad ?? 0;
+          const loadB = b.currentLoad ?? 0;
+          if (loadA !== loadB) return loadA - loadB;
+          return (a.lastAssignedAt ?? 0) - (b.lastAssignedAt ?? 0);
+        });
+      }
+      pickNextWorkerForTask(warehouseId, taskType) {
+        const zone = taskType === "PICK" ? "PICKING" : taskType === "PACK" ? "PACKING" : "SHIPPING";
+        const eligible = this.listWorkers().filter(
+          (w) => w.warehouseId === warehouseId && w.active !== false && w.zone === zone && (w.capacity ?? w.maxTasks ?? 0) > (w.currentLoad ?? w.currentTasks ?? 0)
+        );
+        if (eligible.length === 0) return null;
+        const key = `${warehouseId}:${zone}`;
+        const cursor = this.rrCursors[key] ?? 0;
+        const idx = cursor % eligible.length;
+        const chosen = eligible[idx];
+        this.rrCursors[key] = (idx + 1) % eligible.length;
+        chosen.lastAssignedAt = Date.now();
+        this.updateWorkerLoad(chosen.id, 1);
+        this.save(chosen);
+        return chosen;
+      }
+    };
+  }
+});
+
+// src/domain/warehouses/warehouse.dynamo.repository.ts
+var import_lib_dynamodb5, DEFAULT_TABLE4, DynamoWarehouseRepo;
+var init_warehouse_dynamo_repository = __esm({
+  "src/domain/warehouses/warehouse.dynamo.repository.ts"() {
+    "use strict";
+    import_lib_dynamodb5 = require("@aws-sdk/lib-dynamodb");
+    init_inventoryThresholds();
+    init_eventLogger_service();
+    init_dynamo();
+    init_sync();
+    DEFAULT_TABLE4 = "MiniCosWarehouses";
+    DynamoWarehouseRepo = class {
+      constructor() {
+        this.tableName = process.env.WAREHOUSES_TABLE || DEFAULT_TABLE4;
+      }
+      listWarehouses() {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb5.ScanCommand({ TableName: this.tableName }))
+        );
+        return res.Items ?? [];
+      }
+      list() {
+        return this.listWarehouses();
+      }
+      findById(id) {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb5.GetCommand({ TableName: this.tableName, Key: { id } }))
+        );
+        return res.Item ?? null;
+      }
+      save(warehouse) {
+        waitForPromise(
+          dynamo.send(new import_lib_dynamodb5.PutCommand({ TableName: this.tableName, Item: warehouse }))
+        );
+      }
+      seedIfEmpty(defaults = []) {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb5.ScanCommand({ TableName: this.tableName, Limit: 1 }))
+        );
+        if ((res.Items?.length ?? 0) === 0 && defaults.length > 0) {
+          defaults.forEach((wh) => this.save(wh));
+        }
+      }
+      getWarehouse(id) {
+        return this.findById(id);
+      }
+      saveWarehouse(warehouse) {
+        this.save(warehouse);
+      }
+      decrementInventory(warehouseId, sku) {
+        const wh = this.findById(warehouseId);
+        if (!wh) return;
+        const current = wh.inventory[sku] ?? 0;
+        wh.inventory[sku] = Math.max(0, current - 1);
+        this.save(wh);
+        if (wh.inventory[sku] <= LOW_STOCK_THRESHOLD) {
+          console.warn(`[LOW STOCK] WH ${warehouseId} SKU ${sku} -> qty ${wh.inventory[sku]}`);
+        }
+        eventLogger.log(
+          warehouseId,
+          "INVENTORY_DECREASED",
+          `Inventory decreased for ${sku} -> ${wh.inventory[sku]}`,
+          { sku, quantity: wh.inventory[sku] }
+        );
+      }
+      incrementInventory(warehouseId, sku) {
+        const wh = this.findById(warehouseId);
+        if (!wh) return;
+        const current = wh.inventory[sku] ?? 0;
+        wh.inventory[sku] = current + 1;
+        this.save(wh);
+        eventLogger.log(
+          warehouseId,
+          "INVENTORY_INCREASED",
+          `Inventory increased for ${sku} -> ${wh.inventory[sku]}`,
+          { sku, quantity: wh.inventory[sku] }
+        );
+      }
+      getLowStock(threshold = LOW_STOCK_THRESHOLD) {
+        const results = [];
+        for (const wh of this.listWarehouses()) {
+          for (const [sku, qty] of Object.entries(wh.inventory ?? {})) {
+            if (qty <= threshold) {
+              results.push({ warehouseId: wh.id, sku, quantity: qty });
+            }
+          }
+        }
+        return results;
+      }
+      async getInventoryForWarehouse(warehouseId) {
+        const wh = this.findById(warehouseId);
+        if (!wh) return [];
+        const heuristicReorderPoint = (stock) => Math.min(5, Math.max(1, Math.floor(stock / 10)));
+        const items = [];
+        for (const [sku, qty] of Object.entries(wh.inventory ?? {})) {
+          const reorderPoint = heuristicReorderPoint(qty);
+          items.push({
+            sku,
+            warehouseId,
+            currentStock: qty,
+            reorderPoint,
+            capacity: void 0,
+            lowStock: qty <= (reorderPoint ?? LOW_STOCK_THRESHOLD)
+          });
+        }
+        return items;
+      }
+    };
+  }
+});
+
+// src/domain/backorders/backorder.dynamo.repository.ts
+var import_crypto2, import_lib_dynamodb6, DEFAULT_TABLE5, DynamoBackorderRepo;
+var init_backorder_dynamo_repository = __esm({
+  "src/domain/backorders/backorder.dynamo.repository.ts"() {
+    "use strict";
+    import_crypto2 = require("crypto");
+    import_lib_dynamodb6 = require("@aws-sdk/lib-dynamodb");
+    init_dynamo();
+    init_sync();
+    DEFAULT_TABLE5 = "MiniCosBackorders";
+    DynamoBackorderRepo = class {
+      constructor() {
+        this.tableName = process.env.BACKORDERS_TABLE || DEFAULT_TABLE5;
+      }
+      add(item) {
+        const payload = { id: item.id ?? (0, import_crypto2.randomUUID)(), ...item };
+        waitForPromise(
+          dynamo.send(new import_lib_dynamodb6.PutCommand({ TableName: this.tableName, Item: payload }))
+        );
+      }
+      listAll() {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb6.ScanCommand({ TableName: this.tableName }))
+        );
+        return res.Items ?? [];
+      }
+      listByWarehouse(warehouseId) {
+        if (warehouseId === "ALL") return this.listAll();
+        return this.listAll().filter((b) => b.warehouseId === warehouseId);
+      }
+      listOpen() {
+        return this.listAll().filter(
+          (b) => b.status === "OPEN" || b.status === "PARTIAL"
+        );
+      }
+      listOpenByWarehouse(warehouseId) {
+        const open = this.listOpen();
+        if (warehouseId === "ALL") return open;
+        return open.filter((b) => b.warehouseId === warehouseId);
+      }
+    };
+  }
+});
+
+// src/domain/events/warehouseEvents.dynamo.repository.ts
+var import_lib_dynamodb7, DEFAULT_TABLE6, DynamoWarehouseEventsRepo;
+var init_warehouseEvents_dynamo_repository = __esm({
+  "src/domain/events/warehouseEvents.dynamo.repository.ts"() {
+    "use strict";
+    import_lib_dynamodb7 = require("@aws-sdk/lib-dynamodb");
+    init_dynamo();
+    init_sync();
+    DEFAULT_TABLE6 = "MiniCosWarehouseEvents";
+    DynamoWarehouseEventsRepo = class {
+      constructor() {
+        this.tableName = process.env.WAREHOUSE_EVENTS_TABLE || DEFAULT_TABLE6;
+      }
+      addEvent(event) {
+        waitForPromise(
+          dynamo.send(new import_lib_dynamodb7.PutCommand({ TableName: this.tableName, Item: event }))
+        );
+      }
+      getEventsForWarehouse(warehouseId, limit = 50) {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb7.ScanCommand({ TableName: this.tableName }))
+        );
+        const events = res.Items ?? [];
+        const filtered = warehouseId === "ALL" ? events : events.filter((e) => e.warehouseId === warehouseId);
+        return filtered.slice().sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limit);
+      }
+    };
+  }
+});
+
+// src/domain/customers/customer.dynamo.repository.ts
+var import_lib_dynamodb8, DEFAULT_TABLE7, DynamoCustomerRepo;
+var init_customer_dynamo_repository = __esm({
+  "src/domain/customers/customer.dynamo.repository.ts"() {
+    "use strict";
+    import_lib_dynamodb8 = require("@aws-sdk/lib-dynamodb");
+    init_dynamo();
+    init_sync();
+    DEFAULT_TABLE7 = "MiniCosCustomers";
+    DynamoCustomerRepo = class {
+      constructor() {
+        this.tableName = process.env.CUSTOMERS_TABLE || DEFAULT_TABLE7;
+      }
+      listCustomers() {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb8.ScanCommand({ TableName: this.tableName }))
+        );
+        return res.Items ?? [];
+      }
+      getAll() {
+        return this.listCustomers();
+      }
+      getCustomer(id) {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb8.GetCommand({ TableName: this.tableName, Key: { id } }))
+        );
+        return res.Item ?? null;
+      }
+      saveCustomer(customer) {
+        waitForPromise(
+          dynamo.send(new import_lib_dynamodb8.PutCommand({ TableName: this.tableName, Item: customer }))
+        );
+      }
+      updateDeliveryAddress(id, address) {
+        const customer = this.getCustomer(id);
+        if (!customer) return;
+        customer.deliveryAddress = address;
+        this.saveCustomer(customer);
+      }
+      updateHomeAddress(id, address) {
+        const customer = this.getCustomer(id);
+        if (!customer) return;
+        customer.homeAddress = address;
+        this.saveCustomer(customer);
+      }
+      seedIfEmpty(defaults = []) {
+        const res = waitForPromise(
+          dynamo.send(new import_lib_dynamodb8.ScanCommand({ TableName: this.tableName, Limit: 1 }))
+        );
+        if ((res.Items?.length ?? 0) === 0 && defaults.length > 0) {
+          defaults.forEach(
+            (c) => waitForPromise(
+              dynamo.send(new import_lib_dynamodb8.PutCommand({ TableName: this.tableName, Item: c }))
+            )
+          );
+        }
+      }
+    };
+  }
+});
+
+// src/domain/sharedRepos.ts
+var sharedRepos_exports = {};
+__export(sharedRepos_exports, {
+  backorderRepo: () => backorderRepo,
+  customerRepo: () => customerRepo,
+  getPersistenceMode: () => getPersistenceMode,
+  orderRepo: () => orderRepo,
+  taskRepo: () => taskRepo,
+  warehouseEventsRepo: () => warehouseEventsRepo2,
+  warehouseRepo: () => warehouseRepo2,
+  workerRepo: () => workerRepo
+});
+function getPersistenceMode() {
+  const envMode = (process.env.PERSISTENCE_MODE || "").toLowerCase();
+  if (envMode === "dynamo") return "dynamo";
+  if (envMode === "memory") return "memory";
+  if (process.env.NODE_ENV === "test" || process.env.IS_OFFLINE === "true") {
+    return "memory";
+  }
+  return "memory";
+}
+var mode, orderRepo, taskRepo, workerRepo, warehouseRepo2, backorderRepo, warehouseEventsRepo2, customerRepo;
+var init_sharedRepos = __esm({
+  "src/domain/sharedRepos.ts"() {
+    "use strict";
+    init_order_repository();
+    init_task_repository();
+    init_worker_repository();
+    init_warehouse_repository();
+    init_backorder_repository();
+    init_warehouseEvents_repository();
+    init_customer_repository();
+    init_order_dynamo_repository();
+    init_task_dynamo_repository();
+    init_worker_dynamo_repository();
+    init_warehouse_dynamo_repository();
+    init_backorder_dynamo_repository();
+    init_warehouseEvents_dynamo_repository();
+    init_customer_dynamo_repository();
+    init_eventLogger_service();
+    mode = getPersistenceMode();
+    orderRepo = mode === "dynamo" ? new DynamoOrderRepo() : new OrderRepository();
+    taskRepo = mode === "dynamo" ? new DynamoTaskRepo() : new TaskRepository();
+    workerRepo = mode === "dynamo" ? new DynamoWorkerRepo() : new WorkerRepository();
+    warehouseRepo2 = mode === "dynamo" ? new DynamoWarehouseRepo() : new WarehouseRepository();
+    backorderRepo = mode === "dynamo" ? new DynamoBackorderRepo() : new BackorderRepository();
+    warehouseEventsRepo2 = mode === "dynamo" ? new DynamoWarehouseEventsRepo() : new WarehouseEventsRepository();
+    customerRepo = mode === "dynamo" ? new DynamoCustomerRepo() : new CustomerRepository();
+    setWarehouseEventsRepo(warehouseEventsRepo2);
+  }
+});
+
 // ../node_modules/jws/lib/data-stream.js
 var require_data_stream = __commonJS({
   "../node_modules/jws/lib/data-stream.js"(exports2, module2) {
@@ -28037,535 +29370,8 @@ var import_express20 = __toESM(require_express3(), 1);
 // src/api/routes/orders.route.ts
 var import_express = __toESM(require_express3(), 1);
 
-// src/domain/orders/order.repository.ts
-var orders = [];
-var OrderRepository = class {
-  listOrders() {
-    return orders;
-  }
-  findById(id) {
-    return orders.find((o) => o.id === id) || null;
-  }
-  saveOrder(order) {
-    const idx = orders.findIndex((o) => o.id === order.id);
-    if (idx === -1) orders.push(order);
-    else orders[idx] = order;
-  }
-  updateOrder(order) {
-    this.saveOrder(order);
-  }
-  createOrder(data) {
-    const id = data.id ?? `O-${Date.now()}`;
-    const newOrder = {
-      id,
-      customerId: data.customerId ?? `C-${Date.now()}`,
-      customerName: data.customerName ?? "Simulated Customer",
-      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-      destination: data.destination,
-      status: "PENDING",
-      routes: data.routes ?? {},
-      boxes: data.boxes ?? []
-    };
-    orders.push(newOrder);
-    return newOrder;
-  }
-  listBoxes() {
-    return orders.flatMap((o) => o.boxes);
-  }
-  findOrderByBoxId(boxId) {
-    return orders.find((o) => o.boxes.some((b) => b.id === boxId)) || null;
-  }
-  getBox(boxId) {
-    for (const order of orders) {
-      const box = order.boxes.find((b) => b.id === boxId);
-      if (box) return box;
-    }
-    return null;
-  }
-  updateBoxState(boxId, newState) {
-    for (const order of orders) {
-      const box = order.boxes.find((b) => b.id === boxId);
-      if (box) {
-        box.state = newState;
-        return box;
-      }
-    }
-    return null;
-  }
-  classifyReturn(boxId, category, notes) {
-    for (const order of orders) {
-      const box = order.boxes.find((b) => b.id === boxId);
-      if (box) {
-        box.returnCategory = category;
-        box.returnNotes = notes;
-        box.state = "QA_DONE";
-        return box;
-      }
-    }
-    return null;
-  }
-  async recomputeOrderStatus(orderId) {
-    const order = this.findById(orderId);
-    if (!order) throw new Error("Order not found");
-    const tasks2 = await taskRepo.listTasks();
-    const shipTasks = tasks2.filter((t) => t.orderId === orderId && t.type === "SHIP");
-    const allShipDone = shipTasks.length > 0 && shipTasks.every((t) => t.status === "DONE");
-    console.log(
-      "[ORDER STATUS CHECK]",
-      order.id,
-      "SHIP tasks:",
-      shipTasks.map((t) => t.status)
-    );
-    if (allShipDone) {
-      order.status = "FULFILLED";
-    } else {
-      order.status = "IN_PROGRESS";
-    }
-    this.saveOrder(order);
-    return order.status;
-  }
-  seedIfEmpty(defaults = []) {
-    if (orders.length === 0) orders = [...defaults];
-  }
-};
-
-// src/domain/tasks/task.repository.ts
-var tasks = [];
-var TaskRepository = class {
-  // Always return a fresh array so callers can't mutate the internal store by accident
-  async listTasks() {
-    return [...tasks];
-  }
-  async countActiveTasksForWarehouse(warehouseId) {
-    return tasks.filter(
-      (t) => t.warehouseId === warehouseId && t.status !== "DONE"
-    ).length;
-  }
-  async listTasksForWorker(workerId) {
-    return tasks.filter((t) => t.workerId === workerId);
-  }
-  async getTask(taskId) {
-    return tasks.find((t) => t.id === taskId) ?? null;
-  }
-  async saveTask(task) {
-    const idx = tasks.findIndex((t) => t.id === task.id);
-    if (idx === -1) {
-      tasks.push(task);
-    } else {
-      tasks[idx] = task;
-    }
-  }
-  async createTask(task) {
-    await this.saveTask(task);
-    return task;
-  }
-  async upsertMany(newTasks) {
-    for (const t of newTasks) {
-      const idx = tasks.findIndex((x) => x.id === t.id);
-      if (idx === -1) tasks.push(t);
-      else tasks[idx] = t;
-    }
-  }
-  async updateTaskStatus(taskId, newStatus) {
-    return this.updateStatus(taskId, newStatus);
-  }
-  async updateStatus(taskId, newStatus) {
-    const task = await this.getTask(taskId);
-    if (!task) throw new Error("Task not found");
-    const prevStatus = task.status;
-    task.status = newStatus;
-    await this.saveTask(task);
-    await this.updateBoxStateForTask(task, newStatus);
-    return task;
-  }
-  async assignWorker(taskId, workerId) {
-    const task = await this.getTask(taskId);
-    if (!task) throw new Error("Task not found");
-    task.workerId = workerId;
-    if (task.status === "PENDING_PICK") {
-      return this.updateStatus(task.id, "IN_PROGRESS");
-    }
-    await this.saveTask(task);
-    return task;
-  }
-  seedIfEmpty(defaults = []) {
-    if (!Array.isArray(defaults)) return;
-    if (tasks.length === 0 && defaults.length) {
-      tasks = [...defaults];
-    }
-  }
-  // Optional helper for analytics / debugging
-  async countByStatus() {
-    const result = {};
-    for (const t of tasks) {
-      result[t.status] = (result[t.status] ?? 0) + 1;
-    }
-    return result;
-  }
-  async updateBoxStateForTask(task, status) {
-    const order = orderRepo.findById(task.orderId);
-    if (!order) return;
-    const box = order.boxes.find((b) => b.id === task.boxId);
-    if (!box) return;
-    console.log("[TASK STATUS]", task.id, task.type, "\u2192", status, "for box", task.boxId);
-    if (status === "IN_PROGRESS") {
-      box.state = "PICK_ASSIGNED";
-    } else if (status === "DONE") {
-      if (task.type === "PICK" || !task.type) box.state = "PICKED";
-      else if (task.type === "PACK") box.state = "PACKED";
-      else if (task.type === "SHIP") box.state = "OUTBOUND";
-    }
-    orderRepo.saveOrder(order);
-    await orderRepo.recomputeOrderStatus(order.id);
-    const tasksForBox = tasks.filter(
-      (t) => t.orderId === task.orderId && t.boxId === task.boxId
-    );
-    if (task.type === "PICK" && status === "DONE") {
-      const next = tasksForBox.find(
-        (t) => t.type === "PACK" && t.status === "PENDING"
-      );
-      if (next) {
-        next.status = "PENDING_PICK";
-        this.saveTask(next);
-      }
-    } else if (task.type === "PACK" && status === "DONE") {
-      const next = tasksForBox.find(
-        (t) => t.type === "SHIP" && t.status === "PENDING"
-      );
-      if (next) {
-        next.status = "PENDING_PICK";
-        this.saveTask(next);
-      }
-    } else if (task.type === "SHIP" && status === "DONE") {
-      const order2 = orderRepo.findById(task.orderId);
-      if (order2) {
-        const b = order2.boxes.find((bx) => bx.id === task.boxId);
-        if (b) b.state = "DELIVERED";
-        orderRepo.saveOrder(order2);
-        await orderRepo.recomputeOrderStatus(order2.id);
-      }
-    }
-    console.log("[BOX STATE]", box.id, "now", box.state);
-  }
-  updateInventoryForTask(_task, _prevStatus, _newStatus) {
-  }
-};
-
-// src/domain/workers/worker.repository.ts
-var workers = [];
-var WorkerRepository = class {
-  constructor() {
-    this.rrCursors = {};
-  }
-  listWorkers() {
-    return workers;
-  }
-  listByWarehouse(warehouseId) {
-    return workers.filter((w) => w.warehouseId === warehouseId);
-  }
-  getWorkersByWarehouse(warehouseId) {
-    return this.listByWarehouse(warehouseId);
-  }
-  listByRole(role) {
-    return workers.filter((w) => w.role === role);
-  }
-  findById(id) {
-    return workers.find((w) => w.id === id) || null;
-  }
-  save(worker) {
-    worker.currentLoad = worker.currentLoad ?? worker.currentTasks ?? 0;
-    worker.currentTasks = worker.currentLoad;
-    worker.capacity = worker.capacity ?? worker.maxTasks ?? 0;
-    worker.maxTasks = worker.capacity;
-    worker.active = worker.active ?? true;
-    worker.lastAssignedAt = worker.lastAssignedAt ?? 0;
-    const idx = workers.findIndex((w) => w.id === worker.id);
-    if (idx === -1) workers.push(worker);
-    else workers[idx] = { ...workers[idx], ...worker };
-  }
-  assignTask(workerId, taskId) {
-    const worker = this.findById(workerId);
-    if (!worker) return;
-    worker.activeTaskIds = worker.activeTaskIds ?? [];
-    if (!worker.activeTaskIds.includes(taskId)) {
-      worker.activeTaskIds.push(taskId);
-    }
-    worker.currentLoad = worker.currentLoad ?? 0;
-    worker.currentTasks = worker.currentLoad;
-    this.save(worker);
-  }
-  seedIfEmpty(defaults = []) {
-    if (!Array.isArray(defaults)) return;
-    if (workers.length === 0) {
-      workers = [...defaults];
-    }
-  }
-  updateWorkerLoad(workerId, delta) {
-    const worker = this.findById(workerId);
-    if (worker) {
-      worker.currentLoad = (worker.currentLoad ?? 0) + delta;
-      if (worker.currentLoad < 0) worker.currentLoad = 0;
-      worker.currentTasks = worker.currentLoad;
-      this.save(worker);
-    }
-  }
-  getAvailableWorkers(warehouseId) {
-    return workers.filter(
-      (w) => w.warehouseId === warehouseId && w.active && (w.capacity ?? w.maxTasks ?? 0) > (w.currentLoad ?? 0)
-    ).sort((a, b) => {
-      const loadA = a.currentLoad ?? 0;
-      const loadB = b.currentLoad ?? 0;
-      if (loadA !== loadB) return loadA - loadB;
-      return (a.lastAssignedAt ?? 0) - (b.lastAssignedAt ?? 0);
-    });
-  }
-  pickNextWorkerForTask(warehouseId, taskType) {
-    const zone = taskType === "PICK" ? "PICKING" : taskType === "PACK" ? "PACKING" : "SHIPPING";
-    const eligible = workers.filter(
-      (w) => w.warehouseId === warehouseId && w.active !== false && w.zone === zone && (w.capacity ?? w.maxTasks ?? 0) > (w.currentLoad ?? w.currentTasks ?? 0)
-    );
-    if (eligible.length === 0) return null;
-    const key = `${warehouseId}:${zone}`;
-    const cursor = this.rrCursors[key] ?? 0;
-    const idx = cursor % eligible.length;
-    const chosen = eligible[idx];
-    this.rrCursors[key] = (idx + 1) % eligible.length;
-    chosen.lastAssignedAt = Date.now();
-    this.updateWorkerLoad(chosen.id, 1);
-    this.save(chosen);
-    return chosen;
-  }
-};
-
-// src/config/inventoryThresholds.ts
-var LOW_STOCK_THRESHOLD = 3;
-
-// src/domain/events/eventLogger.service.ts
-var import_crypto = require("crypto");
-
-// src/domain/events/warehouseEvents.repository.ts
-var WarehouseEventsRepository = class {
-  constructor() {
-    this.events = [];
-  }
-  addEvent(event) {
-    this.events.push(event);
-  }
-  getEventsForWarehouse(warehouseId, limit = 50) {
-    const filtered = warehouseId === "ALL" ? this.events : this.events.filter((e) => e.warehouseId === warehouseId);
-    return filtered.slice().sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, limit);
-  }
-};
-var warehouseEventsRepo = new WarehouseEventsRepository();
-
-// src/domain/events/sseManager.ts
-var SSEManager = class {
-  constructor() {
-    this.clients = /* @__PURE__ */ new Map();
-    this.globalClients = /* @__PURE__ */ new Set();
-  }
-  addClient(warehouseId, res, origin) {
-    res.writeHead(200, {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-      "Access-Control-Allow-Origin": origin || "*",
-      "Access-Control-Allow-Credentials": "true",
-      Vary: "Origin"
-    });
-    if (warehouseId === "ALL") {
-      this.globalClients.add(res);
-    } else {
-      if (!this.clients.has(warehouseId)) {
-        this.clients.set(warehouseId, /* @__PURE__ */ new Set());
-      }
-      this.clients.get(warehouseId).add(res);
-    }
-    res.write("event: ping\ndata: connected\n\n");
-  }
-  removeClient(warehouseId, res) {
-    if (warehouseId === "ALL") {
-      this.globalClients.delete(res);
-    } else {
-      this.clients.get(warehouseId)?.delete(res);
-    }
-  }
-  send(res, event) {
-    try {
-      res.write(`data: ${JSON.stringify(event)}
-
-`);
-    } catch (err) {
-    }
-  }
-  broadcastTo(warehouseId, event) {
-    this.clients.get(warehouseId)?.forEach((res) => this.send(res, event));
-  }
-  broadcastGlobal(event) {
-    this.globalClients.forEach((res) => this.send(res, event));
-  }
-};
-var sseManager = new SSEManager();
-
-// src/domain/events/eventLogger.service.ts
-var EventLogger = class {
-  log(warehouseId, type, message, meta) {
-    const event = {
-      id: (0, import_crypto.randomUUID)(),
-      warehouseId,
-      type,
-      message,
-      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-      meta: meta ?? void 0
-    };
-    warehouseEventsRepo.addEvent(event);
-    sseManager.broadcastTo(warehouseId, event);
-    sseManager.broadcastGlobal(event);
-  }
-  logReturnReceived(warehouseId, boxId) {
-    this.log(warehouseId, "RETURN_RECEIVED", `Return received at ${warehouseId} (${boxId})`, {
-      boxId
-    });
-  }
-  logReturnQAStart(warehouseId, boxId) {
-    this.log(warehouseId, "RETURN_QA_STARTED", `QA started for ${boxId}`, { boxId });
-  }
-  logReturnClassified(warehouseId, boxId, category) {
-    this.log(
-      warehouseId,
-      "RETURN_CLASSIFIED",
-      `QA classified ${boxId}: ${category}`,
-      { boxId, category }
-    );
-  }
-};
-var eventLogger = new EventLogger();
-
-// src/domain/warehouses/warehouse.repository.ts
-var warehouses = [];
-var WarehouseRepository = class {
-  /**
-   * Preferred API: return all warehouses.
-   */
-  listWarehouses() {
-    return warehouses;
-  }
-  /**
-   * Backwards-compatible alias: some services still call repo.list()
-   */
-  list() {
-    return this.listWarehouses();
-  }
-  findById(id) {
-    return warehouses.find((w) => w.id === id) || null;
-  }
-  save(warehouse) {
-    const idx = warehouses.findIndex((w) => w.id === warehouse.id);
-    if (idx === -1) warehouses.push(warehouse);
-    else warehouses[idx] = warehouse;
-  }
-  seedIfEmpty(defaults = []) {
-    if (!Array.isArray(defaults)) return;
-    if (warehouses.length === 0 && defaults.length) {
-      warehouses = [...defaults];
-    }
-  }
-  // Convenience getters/setters used elsewhere
-  getWarehouse(id) {
-    return this.findById(id);
-  }
-  saveWarehouse(warehouse) {
-    this.save(warehouse);
-  }
-  decrementInventory(warehouseId, sku) {
-    const wh = this.findById(warehouseId);
-    if (!wh) return;
-    const current = wh.inventory[sku] ?? 0;
-    wh.inventory[sku] = Math.max(0, current - 1);
-    if (wh.inventory[sku] <= LOW_STOCK_THRESHOLD) {
-      console.warn(`[LOW STOCK] WH ${warehouseId} SKU ${sku} -> qty ${wh.inventory[sku]}`);
-    }
-    this.save(wh);
-    eventLogger.log(
-      warehouseId,
-      "INVENTORY_DECREASED",
-      `Inventory decreased for ${sku} -> ${wh.inventory[sku]}`,
-      { sku, quantity: wh.inventory[sku] }
-    );
-  }
-  incrementInventory(warehouseId, sku) {
-    const wh = this.findById(warehouseId);
-    if (!wh) return;
-    const current = wh.inventory[sku] ?? 0;
-    wh.inventory[sku] = current + 1;
-    this.save(wh);
-    eventLogger.log(
-      warehouseId,
-      "INVENTORY_INCREASED",
-      `Inventory increased for ${sku} -> ${wh.inventory[sku]}`,
-      { sku, quantity: wh.inventory[sku] }
-    );
-  }
-  getLowStock(threshold = LOW_STOCK_THRESHOLD) {
-    const results = [];
-    for (const wh of warehouses) {
-      for (const [sku, qty] of Object.entries(wh.inventory ?? {})) {
-        if (qty <= threshold) {
-          results.push({ warehouseId: wh.id, sku, quantity: qty });
-        }
-      }
-    }
-    return results;
-  }
-  async getInventoryForWarehouse(warehouseId) {
-    const wh = this.findById(warehouseId);
-    if (!wh) return [];
-    const heuristicReorderPoint = (stock) => Math.min(5, Math.max(1, Math.floor(stock / 10)));
-    const items = [];
-    for (const [sku, qty] of Object.entries(wh.inventory ?? {})) {
-      const reorderPoint = heuristicReorderPoint(qty);
-      items.push({
-        sku,
-        warehouseId,
-        currentStock: qty,
-        reorderPoint,
-        capacity: void 0,
-        lowStock: qty <= (reorderPoint ?? LOW_STOCK_THRESHOLD)
-      });
-    }
-    return items;
-  }
-};
-
-// src/domain/backorders/backorder.repository.ts
-var backorders = [];
-var BackorderRepository = class {
-  add(item) {
-    backorders.push(item);
-  }
-  listAll() {
-    return [...backorders];
-  }
-  listByWarehouse(warehouseId) {
-    if (warehouseId === "ALL") return [...backorders];
-    return backorders.filter((b) => b.warehouseId === warehouseId);
-  }
-  listOpen() {
-    return backorders.filter((b) => b.status === "OPEN" || b.status === "PARTIAL");
-  }
-  listOpenByWarehouse(warehouseId) {
-    const open = this.listOpen();
-    if (warehouseId === "ALL") return open;
-    return open.filter((b) => b.warehouseId === warehouseId);
-  }
-};
-
-// src/domain/sharedRepos.ts
-var orderRepo = new OrderRepository();
-var taskRepo = new TaskRepository();
-var workerRepo = new WorkerRepository();
-var warehouseRepo2 = new WarehouseRepository();
-var backorderRepo = new BackorderRepository();
+// src/domain/orders/order.service.ts
+init_sharedRepos();
 
 // src/data/canadian_addresses.json
 var canadian_addresses_default = [
@@ -28727,6 +29533,9 @@ function haversineDistanceKm(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
+// src/domain/ai/assignment.service.ts
+init_sharedRepos();
+
 // src/data/skus.json
 var skus_default = {
   "SOFA-3P-GREY": true,
@@ -28758,6 +29567,8 @@ var ALL_SKUS = Object.keys(skus_default);
 var randomSKU = () => ALL_SKUS[Math.floor(Math.random() * ALL_SKUS.length)];
 
 // src/domain/ai/assignment.service.ts
+init_inventoryThresholds();
+init_eventLogger_service();
 var AssignmentService = class {
   constructor() {
     this.workerRepo = workerRepo;
@@ -28975,6 +29786,7 @@ var AssignmentService = class {
 };
 
 // src/domain/orders/order.service.ts
+init_eventLogger_service();
 var OrderService = class {
   constructor() {
     this.assignment = new AssignmentService();
@@ -29213,7 +30025,7 @@ var deleteOrder = async (_req, res) => {
 var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
 
 // ../node_modules/bcryptjs/index.js
-var import_crypto2 = __toESM(require("crypto"), 1);
+var import_crypto3 = __toESM(require("crypto"), 1);
 var randomFallback = null;
 function randomBytes(len) {
   try {
@@ -29221,7 +30033,7 @@ function randomBytes(len) {
   } catch {
   }
   try {
-    return import_crypto2.default.randomBytes(len);
+    return import_crypto3.default.randomBytes(len);
   } catch {
   }
   if (!randomFallback) {
@@ -31151,6 +31963,10 @@ var orders_route_default = router;
 // src/api/routes/tasks.route.ts
 var import_express2 = __toESM(require_express3(), 1);
 
+// src/domain/tasks/task.service.ts
+init_sharedRepos();
+init_sharedRepos();
+
 // src/domain/inventory/inventory.service.ts
 function reserveStock(warehouse, sku, qty) {
   const available = warehouse.inventory[sku] ?? 0;
@@ -31165,6 +31981,7 @@ function consumeReservedStock(box, _warehouse) {
 }
 
 // src/domain/tasks/task.service.ts
+init_eventLogger_service();
 var TaskService = class {
   async listTasks() {
     return taskRepo.listTasks();
@@ -31304,25 +32121,11 @@ var tasks_route_default = router2;
 // src/api/routes/customers.route.ts
 var import_express3 = __toESM(require_express3(), 1);
 
-// src/domain/customers/customer.repository.ts
-var customers = [];
-var CustomerRepository = class {
-  listCustomers() {
-    return customers;
-  }
-  getCustomer(id) {
-    return customers.find((c) => c.id === id) || null;
-  }
-  seedIfEmpty(defaults = []) {
-    if (customers.length === 0) customers = [...defaults];
-  }
-};
-
 // src/api/controllers/customers.controller.ts
-var repo = new CustomerRepository();
+init_sharedRepos();
 var getCustomers = async (_req, res) => {
   try {
-    const customers2 = await repo.listCustomers();
+    const customers2 = await customerRepo.listCustomers();
     res.json(customers2);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -31338,6 +32141,7 @@ var customers_route_default = router3;
 var import_express4 = __toESM(require_express3(), 1);
 
 // src/api/controllers/workers.controller.ts
+init_sharedRepos();
 var getWorkers = async (_req, res) => {
   try {
     const workers2 = workerRepo.listWorkers().map((w) => ({
@@ -31360,7 +32164,12 @@ var workers_route_default = router4;
 // src/api/routes/warehouses.route.ts
 var import_express5 = __toESM(require_express3(), 1);
 
+// src/api/controllers/warehouses.controller.ts
+init_sharedRepos();
+init_sharedRepos();
+
 // src/domain/metrics/metrics.service.ts
+init_sharedRepos();
 var MetricsService = class {
   // Computes metrics over a sliding window; today = last 24h.
   async getWarehouseMetrics(warehouseId, now = /* @__PURE__ */ new Date()) {
@@ -31528,6 +32337,7 @@ var MetricsService = class {
 };
 
 // src/api/controllers/warehouses.controller.ts
+init_sharedRepos();
 var getWarehouses = async (_req, res) => {
   try {
     const warehouses2 = warehouseRepo2.listWarehouses().map((w) => ({
@@ -31761,6 +32571,7 @@ var scan_route_default = router7;
 var import_express8 = __toESM(require_express3(), 1);
 
 // src/domain/warehouses/warehouse.service.ts
+init_sharedRepos();
 var WarehouseService = class {
   constructor() {
     this.repo = warehouseRepo2;
@@ -31871,6 +32682,8 @@ var WarehouseService = class {
 };
 
 // src/domain/returns/returns.service.ts
+init_sharedRepos();
+init_eventLogger_service();
 var ReturnsService = class {
   constructor() {
     this.orderRepo = orderRepo;
@@ -31964,7 +32777,7 @@ var ReturnsService = class {
         "RETURN_CLASSIFIED"
       ].includes(b.state)
     );
-    const events = warehouseEventsRepo.getEventsForWarehouse("ALL", 1e3);
+    const events = warehouseEventsRepo2.getEventsForWarehouse("ALL", 1e3);
     return relevant.map((b) => {
       const order = this.orderRepo.findById(b.orderId);
       const boxEvents = events.filter((e) => e.meta?.boxId === b.id);
@@ -31997,6 +32810,7 @@ var ReturnsService = class {
 };
 
 // src/api/controllers/returns.controller.ts
+init_sharedRepos();
 var orderService = new OrderService();
 var warehouseService = new WarehouseService();
 var returnsService = new ReturnsService();
@@ -32097,7 +32911,7 @@ var getReturnDetail = async (req, res) => {
     const box = await orderService.getBox(boxId);
     if (!box) return res.status(404).json({ error: "Return not found" });
     const order = await orderService.getOrder(box.orderId);
-    const events = warehouseEventsRepo.getEventsForWarehouse("ALL", 1e3).filter(
+    const events = warehouseEventsRepo2.getEventsForWarehouse("ALL", 1e3).filter(
       (e) => e.meta?.boxId === boxId
     );
     const receivedAt = events.find((e) => e.type === "RETURN_RECEIVED")?.timestamp;
@@ -32182,6 +32996,7 @@ var returns_route_default = router8;
 var import_express9 = __toESM(require_express3(), 1);
 
 // src/api/controllers/analytics.controller.ts
+init_sharedRepos();
 var metricsService = new MetricsService();
 var getOverview = async (_req, res) => {
   try {
@@ -32461,6 +33276,7 @@ var simulator_route_default = router11;
 var import_express12 = __toESM(require_express3(), 1);
 
 // src/domain/integrations/integration.service.ts
+init_sharedRepos();
 var IntegrationOrderService = class {
   async createCOSOrderFromExternal(payload) {
     if (!payload.items || payload.items.length === 0) {
@@ -32567,6 +33383,8 @@ var metadata_route_default = router13;
 
 // src/api/routes/analyticsLowStock.route.ts
 var import_express14 = __toESM(require_express3(), 1);
+init_sharedRepos();
+init_inventoryThresholds();
 var router14 = (0, import_express14.Router)();
 router14.get("/", (_req, res) => {
   const warehouses2 = warehouseRepo2.listWarehouses();
@@ -32610,6 +33428,7 @@ var warehouseMetrics_route_default = router16;
 var import_express17 = __toESM(require_express3(), 1);
 
 // src/api/controllers/warehouseEvents.controller.ts
+init_sharedRepos();
 var getWarehouseEvents = async (req, res) => {
   const { id } = req.params;
   const limit = Number(req.query.limit ?? 50) || 50;
@@ -32618,7 +33437,7 @@ var getWarehouseEvents = async (req, res) => {
   if (!(user.role === "ADMIN" || user.role === "OPS_MANAGER") && !(user.role === "WAREHOUSE_MANAGER" && user.warehouseId === id)) {
     return res.status(403).json({ error: "Forbidden" });
   }
-  const events = warehouseEventsRepo.getEventsForWarehouse(id, limit);
+  const events = warehouseEventsRepo2.getEventsForWarehouse(id, limit);
   return res.json({ warehouseId: id, events });
 };
 
@@ -32634,6 +33453,7 @@ var warehouseEvents_route_default = router17;
 
 // src/api/routes/warehouseEvents.stream.route.ts
 var import_express18 = __toESM(require_express3(), 1);
+init_sseManager();
 var router18 = (0, import_express18.Router)();
 router18.get(
   "/stream",
@@ -32664,6 +33484,7 @@ var warehouseEvents_stream_route_default = router18;
 var import_express19 = __toESM(require_express3(), 1);
 
 // src/domain/ops/metrics.service.ts
+init_sharedRepos();
 var STUCK_THRESHOLD_MS = 30 * 60 * 1e3;
 var WINDOW_MS = 60 * 1e3;
 var OpsMetricsService = class {
@@ -32799,6 +33620,7 @@ var OpsMetricsService = class {
 };
 
 // src/api/controllers/ops.controller.ts
+init_sharedRepos();
 var metricsService2 = new OpsMetricsService();
 var getOpsSummary = async (req, res) => {
   const user = req.user;
@@ -32820,7 +33642,7 @@ var getOpsExceptions = async (req, res) => {
   }
   try {
     const limit = Number(req.query.limit ?? 50) || 50;
-    const events = warehouseEventsRepo.getEventsForWarehouse("ALL", limit * 2).filter(
+    const events = warehouseEventsRepo2.getEventsForWarehouse("ALL", limit * 2).filter(
       (e) => ["BACKORDER_CREATED", "TASK_FAILED", "LOW_STOCK", "STUCK_TASK"].includes(e.type)
     ).slice(0, limit);
     const now = Date.now();
@@ -32879,7 +33701,7 @@ router19.get("/backorders/summary", requireAuth, requireRole("ADMIN"), getBackor
 var ops_route_default = router19;
 
 // src/api/index.ts
-var customerRepo = new CustomerRepository();
+init_sharedRepos();
 workerRepo.seedIfEmpty();
 warehouseRepo2.seedIfEmpty();
 customerRepo.seedIfEmpty?.();
@@ -32948,6 +33770,7 @@ var workerSeed = warehouseSeed.flatMap((wh) => {
 });
 
 // src/seed/seed.ts
+init_sharedRepos();
 function runAllSeeds() {
   console.log("\u{1F331} Running Mini-COS seeds...");
   warehouseRepo2.seedIfEmpty(warehouseSeed);

@@ -1,353 +1,145 @@
-# COS (Cozey Operating System) - Warehouse & Logistics Platform
+# Mini-COS — Serverless Warehouse Operations Platform
 
-## Overview
-COS is a full end-to-end internal operations system inspired by Cozey.ca’s real warehouse and post‑purchase logistics workflows.  
-This project simulates how a modern e-commerce furniture brand manages orders, boxes, workers, warehouses, tasks, shipping integrations, and returns.
+Mini-COS is a **production-inspired, serverless warehouse operations system** designed to simulate how modern e-commerce companies manage orders, inventory, tasks, and fulfillment workflows at scale.
 
-This README is written as if this were *actively used by Cozey Engineering staff*, matching their job description for a Senior Software Engineer.
+This project is intentionally built to mirror **real-world logistics platforms** (WMS / COS systems) with clean architecture, scalability, and extensibility in mind.
+
+> 🚧 **Status:** In active development — core domain architecture and services implemented, with additional features planned.
 
 ---
-## Quick start (local)
-Prereqs: Node 18+, npm, (optional) Serverless Framework for deploys.
+
+## ✨ Key Features
+
+- **Order lifecycle management**
+  - Receive and track customer orders
+  - Generate PICK → PACK → SHIP workflows
+- **Automated warehouse assignment**
+  - Assigns orders to the most suitable warehouse based on distance, capacity, and load
+- **Task orchestration**
+  - Creates and manages warehouse tasks across workers and locations
+- **Domain-driven design**
+  - Clear separation of Orders, Tasks, Warehouses, Workers, Inventory, Returns
+- **Serverless-first architecture**
+  - Designed for horizontal scalability and cost efficiency
+- **Extensible foundation**
+  - Built to support future AI routing, analytics, and event-driven workflows
+
+---
+
+## 🧠 System Architecture
+
+```
+mini-cos-serverless/
+├── src/
+│   ├── domain/
+│   │   ├── orders/
+│   │   ├── tasks/
+│   │   ├── warehouses/
+│   │   ├── workers/
+│   │   ├── inventory/
+│   │   ├── returns/
+│   │   └── ai/
+│   ├── events/
+│   ├── utils/
+│   ├── config/
+│   └── seed/
+├── serverless.yml
+├── package.json
+└── README.md
+```
+
+Each domain encapsulates:
+- Entities & models
+- Business rules
+- Services & workflows
+- Repository abstractions
+
+This structure keeps business logic **framework-agnostic**, testable, and easy to evolve.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Runtime:** Node.js + TypeScript
+- **Architecture:** Serverless Framework
+- **API:** RESTful services
+- **Cloud (planned):**
+  - AWS Lambda
+  - API Gateway
+  - DynamoDB
+  - SQS / EventBridge
+- **Tooling:** ESLint, Prettier, GitHub
+
+---
+
+## 🔄 Core Workflows
+
+### Order Fulfillment
+1. Customer order is received
+2. Best warehouse is selected automatically
+3. PICK → PACK → SHIP tasks are generated
+4. Workers complete tasks, updating order status
+
+### Warehouse Assignment Logic
+- Distance to customer
+- Active workload per warehouse
+- Worker availability
+- Inventory thresholds
+
+---
+
+## 🧪 Development Status
+
+### Implemented
+- Core domain models and services
+- Warehouse assignment logic
+- Task lifecycle workflows
+- Seed data for simulation
+- Clean domain-driven structure
+
+### Planned
+- Authentication & role-based access
+- Frontend dashboard (React)
+- Event-driven task processing
+- Analytics & reporting
+- AI-assisted routing optimization
+- Automated tests
+
+---
+
+## 🚀 Getting Started
 
 ```bash
-git clone <repo-url>
-cd mini-cos
+git clone https://github.com/chanho-chris-kim/mini-cos-serverless.git
+cd mini-cos-serverless
 npm install
-# Run backend in dev
-cd backend && npm run dev
-# Run frontend in dev
-cd ../frontend && npm run dev
 ```
 
-# Key Features
-- **Complete Post‑Purchase Journey**
-  - Order ingestion  
-  - Multi‑warehouse routing  
-  - Automated task creation  
-  - Picking, packing, shipping workflows  
-  - Courier tracking + customer updates  
-
-- **AI‑Driven Warehouse Automation**
-  - Auto task assignment  
-  - Smart routing engine (multi‑warehouse, modular furniture)  
-  - QA classification assistant for returns  
-
-- **State Machines**
-  - Forward fulfillment state machine  
-  - Reverse (returns) state machine with classification  
-
-- **Scanning System**
-  - Workers scan → COS interprets the meaning automatically  
-  - No dropdowns, no decisions  
-  - Context-aware transitions  
-
-- **Serverless Architecture**
-  - AWS Lambda  
-  - DynamoDB  
-  - SQS  
-  - SNS  
-  - API Gateway  
-  - EventBridge  
-
-- **Role‑Based Access**
-  - Admin, Ops, Warehouse Manager, Worker, QA, Support  
+Local execution and deployment steps will evolve as cloud integrations are finalized.
 
 ---
 
-# System Architecture
+## 📌 Project Goals
 
-```
-                ┌───────────────┐
-                │   Customer    │
-                └───────┬───────┘
-                        │ Order webhook
-                        ▼
-                ┌───────────────────┐
-                │       COS         │
-                └────────┬──────────┘
-                         │
-         ┌───────────────┼────────────────┐
-         ▼               ▼                ▼
- ┌────────────┐   ┌────────────┐   ┌────────────┐
- │ Router/AI  │   │  Task Eng. │   │  Scan API  │
- └────────────┘   └─────┬──────┘   └──────┬─────┘
-                         │               Scan
-                         ▼                 │
-                ┌───────────────────┐      │
-                │   Warehouse WMS   │◄─────┘
-                └───────────────────┘
-                         │
-         ┌───────────────┼─────────────────────────────┐
-         ▼               ▼                             ▼
-  ┌────────────┐   ┌────────────┐              ┌────────────┐
-  │ Picking    │   │ Packing    │              │ Shipping   │
-  └────────────┘   └────────────┘              └────────────┘
-
-                     RETURN FLOW
-                           ▼
-                     ┌──────────┐
-                     │ RETURNS  │
-                     └─────┬────┘
-                           ▼
-                    ┌───────────┐
-                    │   QA      │
-                    └─────┬─────┘
-                           ▼
-         ┌────────────┬──────────────┬──────────────┬─────────────┐
-         ▼            ▼              ▼              ▼             ▼
-   FULL_PRICE   DISCOUNT       REFURBISH       SALVAGE        TRASH
-```
+- Simulate real-world warehouse operations
+- Demonstrate scalable backend architecture
+- Showcase clean domain-driven design
+- Serve as a portfolio-grade systems project
 
 ---
 
-# Fulfillment Workflow (Forward Flow)
+## 👤 Author
 
-## Box State Machine
+**Chanho Kim**  
+Front-End / Full-Stack Developer  
+📍 Montreal, Canada  
 
-```
-PENDING
-  → PICK_ASSIGNED
-  → PICKED
-  → PACKED
-  → OUTBOUND
-  → SHIPPED
-  → IN_TRANSIT
-  → DELIVERED
-```
-
-### Description
-
-| State | Meaning |
-|-------|---------|
-| **PENDING** | Order created, box not processed |
-| **PICK_ASSIGNED** | Task created + assigned |
-| **PICKED** | Box scanned in picking zone |
-| **PACKED** | Scanned in packing zone |
-| **OUTBOUND** | Label printed, courier scheduled |
-| **SHIPPED** | Courier pickup scan |
-| **IN_TRANSIT** | Courier movement |
-| **DELIVERED** | Customer delivery scan |
+- Website: https://chanhokim.ca  
+- GitHub: https://github.com/chanho-chris-kim  
+- LinkedIn: https://linkedin.com/in/chanho-chris-kim  
 
 ---
 
-# Return Workflow (Reverse Flow)
+## 📄 License
 
-## Return State Machine
-
-```
-RETURN_RECEIVED
-  → QA_PENDING
-  → QA_IN_PROGRESS
-  → QA_DONE
-  → RETURN_CLASSIFIED
-```
-
-### Classification Categories
-```
-FULL_PRICE
-DISCOUNT
-REFURBISH
-SALVAGE
-TRASH
-```
-
-### Meaning
-
-| Category | Meaning |
-|----------|---------|
-| **FULL_PRICE** | Item is like‑new → restock |
-| **DISCOUNT** | Minor damage → open-box sale |
-| **REFURBISH** | Needs repair or cleaning |
-| **SALVAGE** | Used for parts |
-| **TRASH** | Cannot be reused |
-
----
-
-# Scanning Logic
-
-Workers only **scan**.  
-COS decides the correct next state.
-
-## Scan API
-
-### `POST /scan`
-
-#### Request:
-```json
-{
-  "userId": "U1002",
-  "boxId": "BX34955",
-  "warehouseId": "W-MTL",
-  "zone": "PICKING"
-}
-```
-
-#### Response:
-```json
-{
-  "status": "PICKED",
-  "message": "Box BX34955 marked as PICKED"
-}
-```
-
----
-
-# Data Models
-
-## Order
-```ts
-interface Order {
-  orderId: string;
-  customerId: string;
-  createdAt: string;
-  status: "PENDING" | "PARTIAL" | "FULFILLED" | "DELIVERED" | "RETURNED";
-  boxes: string[];
-  warehouseRoutes: Record<string,string[]>;
-  courierTracking?: Record<string,string>;
-}
-```
-
-## Box
-```ts
-interface Box {
-  boxId: string;
-  orderId: string;
-  sku: string;
-  state:
-    | "PENDING"
-    | "PICK_ASSIGNED"
-    | "PICKED"
-    | "PACKED"
-    | "OUTBOUND"
-    | "SHIPPED"
-    | "IN_TRANSIT"
-    | "DELIVERED"
-    | "RETURN_RECEIVED"
-    | "QA_PENDING"
-    | "QA_IN_PROGRESS"
-    | "QA_DONE"
-    | "RETURN_CLASSIFIED";
-
-  fulfillmentWarehouseId?: string;
-  trackingNumber?: string;
-  returnCategory?:
-    | "FULL_PRICE"
-    | "DISCOUNT"
-    | "REFURBISH"
-    | "SALVAGE"
-    | "TRASH";
-}
-```
-
-## Task
-```ts
-interface Task {
-  taskId: string;
-  warehouseId: string;
-  type: "PICK" | "PACK" | "SHIP" | "REFURBISH" | "QA";
-  boxId: string;
-  assignedTo?: string;
-  status: "PENDING" | "IN_PROGRESS" | "DONE" | "FAILED";
-  createdAt: string;
-  updatedAt: string;
-}
-```
-
-## Warehouse
-```ts
-interface Warehouse {
-  warehouseId: string;
-  name: string;
-  region: string;
-  zones: string[];
-  stock: Record<string,number>;
-}
-```
-
-## User
-```ts
-interface User {
-  userId: string;
-  role: "ADMIN" | "OPS_MANAGER" | "WAREHOUSE_MANAGER" | "WORKER" | "QA" | "SUPPORT";
-  warehouseId?: string;
-}
-```
-
----
-
-# AI Agents
-
-## Task Assignment Agent
-Assigns tasks automatically based on:
-- worker speed  
-- workload  
-- warehouse zone availability  
-
-## Routing Engine
-Determines:
-- which warehouse fulfills which box  
-- closest stock available  
-- split-shipment optimization  
-
-## QA Classification Assistant
-Helps warehouse QA workers classify returns.
-
----
-
-# Testing
-- Jest unit tests  
-- Integration tests for state machine  
-- End-to-end flows using mocked scans  
-
----
-
-# Frontend UI (Planned)
-- React + TypeScript  
-- Tailwind  
-- Role‑based dashboards  
-- Worker “scan interface” optimized for tablets  
-- QA return classification UI  
-
----
-
-# Deployment (AWS Serverless)
-- API Gateway  
-- Lambda  
-- DynamoDB  
-- SQS Task Queue  
-- SNS Notifications  
-- EventBridge Scheduled Automation  
-
----
-
-# Roadmap
-- Worker performance dashboard  
-- Live warehouse heatmaps  
-- Courier rate optimization  
-- Real-time order tracking map  
-- AI‑powered forecasting  
-
----
-
-# License
-This project is licensed under the **Creative Commons Attribution–NonCommercial–NoDerivatives 4.0 International License** (CC BY-NC-ND 4.0).
-
-You may:
-- View and share the project for portfolio or educational purposes.
-
-You may **not**:
-- Use the software commercially  
-- Modify, remix, or build upon the code  
-- Redistribute modified versions  
-- Integrate the code into commercial or internal business systems  
-
-See the full license here: [LICENSE](./LICENSE)
-
----
-
-# 👤 Author
-**Chanho Chris Kim**  
-GitHub: https://github.com/chanho-chris-kim  
-Website: https://chanhokim.ca  
-
+MIT License

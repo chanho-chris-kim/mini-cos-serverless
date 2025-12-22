@@ -21,11 +21,7 @@ import warehouseEventsStreamRouter from "./routes/warehouseEvents.stream.route";
 import opsRouter from "./routes/ops.route";
 import { devBypassAuth } from "../middleware/devBypass.middleware";
 import { requireAuth } from "../middleware/auth.middleware";
-import { workerRepo, warehouseRepo, orderRepo } from "../domain/sharedRepos";
-import { CustomerRepository } from "../domain/customers/customer.repository";
-
-// If you still have a seed layer, keep or adjust as needed:
-const customerRepo = new CustomerRepository();
+import { workerRepo, warehouseRepo, orderRepo, customerRepo } from "../domain/sharedRepos";
 
 workerRepo.seedIfEmpty();
 warehouseRepo.seedIfEmpty();

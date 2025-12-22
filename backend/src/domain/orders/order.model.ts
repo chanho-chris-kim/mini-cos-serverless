@@ -8,7 +8,7 @@ export interface OrderEntity {
   customerName: string;
   createdAt: string;
 
-  status: "PENDING" | "PARTIAL" | "FULFILLED" | "DELIVERED" | "RETURNED";
+  status: "PENDING" | "IN_PROGRESS" | "PARTIAL" | "FULFILLED" | "DELIVERED" | "RETURNED" | string;
 
   destination?: Address & { street?: string };
 

@@ -6,5 +6,14 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/chanho-chris-kim/mini-cos-serverless"
+  },
+  "scripts": {
+    "backend:offline": "cd backend && npm run offline",
+    "backend:deploy:dev": "cd backend && npm run deploy:dev",
+    "backend:deploy:staging": "cd backend && npm run deploy:staging",
+    "backend:deploy:prod": "cd backend && npm run deploy:prod",
+    "backend:remove:dev": "cd backend && npm run remove:dev",
+    "backend:remove:staging": "cd backend && npm run remove:staging",
+    "backend:remove:prod": "cd backend && npm run remove:prod"
   }
 }

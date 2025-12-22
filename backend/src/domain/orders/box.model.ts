@@ -29,6 +29,7 @@ export interface BoxEntity {
   warehouseId?: string;
   trackingNumber?: string;
   returnCategory?: ReturnCategory;
+  returnNotes?: string;
   notes?: string;
   reservedQty?: number;
 }

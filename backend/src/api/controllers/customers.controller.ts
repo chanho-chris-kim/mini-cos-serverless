@@ -1,16 +1,14 @@
 // backend/src/api/controllers/customers.controller.ts
 
 import type { Request, Response } from "express";
-import { CustomerRepository } from "../../domain/customers/customer.repository";
-
-const repo = new CustomerRepository();
+import { customerRepo } from "../../domain/sharedRepos";
 
 /** --------------------------------
  * GET /customers
  * -------------------------------- */
 export const getCustomers = async (_req: Request, res: Response) => {
   try {
-    const customers = await repo.listCustomers();
+    const customers = await customerRepo.listCustomers();
     res.json(customers);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -22,7 +20,7 @@ export const getCustomers = async (_req: Request, res: Response) => {
  * -------------------------------- */
 export const getCustomerById = async (req: Request, res: Response) => {
   try {
-    const customer = await repo.getCustomer(req.params.id);
+    const customer = await customerRepo.getCustomer(req.params.id);
     if (!customer) return res.status(404).json({ error: "Customer not found" });
     res.json(customer);
   } catch (err: any) {
@@ -44,7 +42,7 @@ export const createCustomer = async (req: Request, res: Response) => {
         .json({ error: "id, name, and email are required" });
     }
 
-    await repo.saveCustomer(customer);
+    await customerRepo.saveCustomer(customer);
     res.status(201).json(customer);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -63,7 +61,7 @@ export const updateDeliveryAddress = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid address" });
     }
 
-    await repo.updateDeliveryAddress(id, address);
+    await customerRepo.updateDeliveryAddress(id, address);
 
     res.json({ message: "deliveryAddress updated", id, address });
   } catch (err: any) {
@@ -83,7 +81,7 @@ export const updateHomeAddress = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid address" });
     }
 
-    await repo.updateHomeAddress(id, address);
+    await customerRepo.updateHomeAddress(id, address);
 
     res.json({ message: "homeAddress updated", id, address });
   } catch (err: any) {

@@ -1,7 +1,18 @@
 import { randomUUID } from "crypto";
 import type { WarehouseEventType, WarehouseEvent } from "../../types";
-import { warehouseEventsRepo } from "./warehouseEvents.repository";
+import { warehouseEventsRepo as inMemoryWarehouseEventsRepo } from "./warehouseEvents.repository";
 import { sseManager } from "./sseManager";
+
+type WarehouseEventsRepoLike = {
+  addEvent(event: WarehouseEvent): void;
+  getEventsForWarehouse(warehouseId: string, limit?: number): WarehouseEvent[];
+};
+
+let eventsRepo: WarehouseEventsRepoLike = inMemoryWarehouseEventsRepo;
+
+export function setWarehouseEventsRepo(repo: WarehouseEventsRepoLike) {
+  eventsRepo = repo;
+}
 
 class EventLogger {
   log(
@@ -18,7 +29,7 @@ class EventLogger {
       timestamp: new Date().toISOString(),
       meta: meta ?? undefined,
     };
-    warehouseEventsRepo.addEvent(event);
+    eventsRepo.addEvent(event);
     sseManager.broadcastTo(warehouseId, event);
     sseManager.broadcastGlobal(event);
   }

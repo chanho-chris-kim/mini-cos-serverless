@@ -1,8 +1,8 @@
 import type { Customer } from "../../types";
-import { CustomerRepository } from "./customer.repository";
+import { customerRepo } from "../sharedRepos";
 
 export class CustomerService {
-  private repo = new CustomerRepository();
+  private repo = customerRepo;
 
   getAll(): Customer[] {
     return this.repo.getAll();

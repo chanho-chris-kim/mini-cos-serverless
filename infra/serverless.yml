@@ -1,3 +1,5 @@
+# NOTE: Backend/API deployment is defined in backend/serverless.yaml.
+# This file is reserved for future infra extensions and should not overlap the backend stack.
 service: mini-cos
 provider:
   name: aws
